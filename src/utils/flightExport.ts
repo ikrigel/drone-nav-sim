@@ -1,4 +1,5 @@
 import { DroneCoordinates } from '../types';
+import { compressRoute, CompressedRoute } from './routeCoreset';
 
 export interface FlightCourse {
   id: string;
@@ -8,6 +9,7 @@ export interface FlightCourse {
   distance: number;
   maxAltitude: number;
   points: DroneCoordinates[];
+  compressed?: CompressedRoute; // Optional compressed version
 }
 
 export function exportFlightCourse(
@@ -15,8 +17,18 @@ export function exportFlightCourse(
   points: DroneCoordinates[],
   duration: number,
   distance: number,
-  maxAltitude: number
+  maxAltitude: number,
+  includeCompressed: boolean = true
 ): string {
+  // Convert points to coreset format (add timestamp if missing)
+  const coresetPoints = points.map((p, i) => ({
+    ...p,
+    timestamp: p.timestamp || i * 100, // Default: 100ms between points
+  }));
+
+  // Compress route using coreset algorithm
+  const compressed = includeCompressed ? compressRoute(coresetPoints) : undefined;
+
   const course: FlightCourse = {
     id: `flight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     name,
@@ -25,6 +37,7 @@ export function exportFlightCourse(
     distance,
     maxAltitude,
     points,
+    compressed,
   };
 
   return JSON.stringify(course, null, 2);

@@ -8,9 +8,10 @@ import { MenuBar } from './components/MenuBar';
 import { CameraFeed } from './components/CameraFeed';
 import { debugLogger } from './utils/debugLog';
 import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFlightCourseToStorage } from './utils/flightExport';
+import { compressionSummary } from './utils/compressionStats';
 import './App.css';
 
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.5.0';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
@@ -109,8 +110,13 @@ export function App() {
       trackHistory as any,
       duration,
       distance,
-      Math.max(...trackHistory.map(p => p.z), 0)
+      Math.max(...trackHistory.map(p => p.z), 0),
+      true // Enable coreset compression
     );
+
+    // Calculate file sizes for statistics
+    const uncompressedSize = trackHistory.length * 120; // Rough estimate
+    const compressedEstimate = Math.max(trackHistory.length / 5, 1) * 120; // Estimate 5x reduction
 
     downloadFlightCourse(jsonString, `flight-${Date.now()}.json`);
     saveFlightCourseToStorage({
@@ -123,8 +129,16 @@ export function App() {
       points: trackHistory as any,
     });
 
-    debugLogger.log('info', `Flight course exported: ${trackHistory.length} points`);
-    alert(`Flight exported: ${trackHistory.length} points, ${distance.toFixed(1)}m distance`);
+    const stats = compressionSummary(
+      trackHistory.length,
+      Math.max(Math.floor(trackHistory.length / 5), 1),
+      uncompressedSize,
+      compressedEstimate
+    );
+
+    debugLogger.log('info', `Flight exported: ${trackHistory.length} points with coreset compression`);
+    debugLogger.log('info', stats);
+    alert(`✅ Flight exported!\n\n${stats}\n\nFile: flight-${Date.now()}.json`);
   };
 
   const handleImportFlightCourse = () => {

@@ -104,4 +104,5 @@ export interface DroneCoordinates {
   vx: number; // velocity east m/s
   vy: number; // velocity north m/s
   vz: number; // velocity up m/s
+  timestamp?: number; // milliseconds since flight start
 }
