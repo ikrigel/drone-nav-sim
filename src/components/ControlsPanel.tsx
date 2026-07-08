@@ -9,6 +9,8 @@ interface ControlsPanelProps {
   onStop: () => void;
   onReset: () => void;
   onRecalibrate: () => void;
+  onExportFlightCourse?: () => void;
+  onImportFlightCourse?: () => void;
 }
 
 export function ControlsPanel({
@@ -20,6 +22,8 @@ export function ControlsPanel({
   onStop,
   onReset,
   onRecalibrate,
+  onExportFlightCourse,
+  onImportFlightCourse,
 }: ControlsPanelProps) {
   const sensorsReady =
     orientationPermission === 'granted' && motionPermission === 'granted';
@@ -60,9 +64,21 @@ export function ControlsPanel({
       )}
 
       {!isFlying && sensorsReady && (
-        <button className="btn btn-secondary" onClick={onReset}>
-          Reset
-        </button>
+        <>
+          <button className="btn btn-secondary" onClick={onReset}>
+            Reset
+          </button>
+          {onExportFlightCourse && (
+            <button className="btn btn-secondary" onClick={onExportFlightCourse} title="Export flight course as JSON">
+              💾 Export
+            </button>
+          )}
+          {onImportFlightCourse && (
+            <button className="btn btn-secondary" onClick={onImportFlightCourse} title="Import flight course from JSON">
+              📥 Import
+            </button>
+          )}
+        </>
       )}
     </div>
   );

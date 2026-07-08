@@ -217,36 +217,23 @@ export function opticalFlowToSpeed(
 
 /**
  * Estimate altitude from vertical feature positions
- * For indoor phone-based movement, altitude is typically 0.5-2 meters
- * This is NOT traditional drone altitude, but camera height above ground
+ * For ground-level room exploration, altitude is ALWAYS 0 (we're moving horizontally)
+ * The camera is held at typical phone height, but we track 2D movement on the ground plane
  */
 export function estimateAltitudeFromFeatures(
   features: CameraFeature[],
-  imageHeight: number,
+  _imageHeight: number,
   _focalLength: number,
-  droneHeightM = 0.5 // typical phone height above ground during movement (not 1.5!)
+  _droneHeightM = 0.5
 ): number {
-  if (features.length === 0) return droneHeightM;
+  if (features.length === 0) return 0;
 
-  // For phone-based indoor movement:
-  // - Most features are at walking distance (nearby walls, floor, ceiling)
-  // - Altitude should remain relatively constant (~0.5-1.5m based on phone height)
-  // - Don't extrapolate beyond typical indoor ceiling height (~3m)
+  // CRITICAL FIX: For ground-based room navigation, altitude should be 0
+  // We're tracking movement on a horizontal plane, not flying up/down
+  // The camera height doesn't change - it's fixed at phone height
+  // This prevents "height drift" and keeps z=0 always (ground level)
 
-  const avgY = features.reduce((sum, f) => sum + f.y, 0) / features.length;
-  const normalizedY = (imageHeight - avgY) / imageHeight; // 0 = top, 1 = bottom
-
-  // For indoor use: cap maximum altitude to 3 meters (typical ceiling)
-  // Features near horizon (norm=0) don't necessarily mean far away
-  const maxIndoorAltitude = 3; // meters (indoor ceiling)
-  const minAltitude = 0.3; // minimum altitude (phone held low)
-
-  const estimatedAltitude = Math.max(
-    minAltitude,
-    Math.min(maxIndoorAltitude, droneHeightM + normalizedY * (maxIndoorAltitude - minAltitude))
-  );
-
-  return estimatedAltitude;
+  return 0; // Always return 0 for ground-level navigation
 }
 
 function getGray(data: Uint8ClampedArray, pixelIdx: number): number {

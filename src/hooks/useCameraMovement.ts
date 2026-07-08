@@ -8,6 +8,7 @@ import {
   estimateAltitudeFromFeatures,
 } from '../utils/opticalFlow';
 import { loadOrCreateCalibration } from '../utils/cameraCalibration';
+import { KalmanFilter2D } from '../utils/kalmanFilter';
 import { log } from '../utils/debugLog';
 
 interface UseCameraMovementProps {
@@ -41,6 +42,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
   const streamRef = useRef<MediaStream | null>(null);
   const prevFeaturesRef = useRef<CameraFeature[]>([]);
   const prevTimestampRef = useRef<number>(0);
+  const kalmanFilterRef = useRef<KalmanFilter2D>(new KalmanFilter2D(0, 0));
   const coordsRef = useRef<DroneCoordinates>({
     x: 0,
     y: 0,
@@ -223,12 +225,20 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
               log.warn(`Position delta too large: ${positionDelta.toFixed(2)}m, scaled by ${scale.toFixed(2)}`);
             }
 
-            // Update position
+            // Update raw position
+            const rawX = coordsRef.current.x + finalVx * dtSeconds;
+            const rawY = coordsRef.current.y + finalVy * dtSeconds;
+
+            // Apply Kalman filter to smooth position estimates
+            // This reduces noise and drift from optical flow
+            const smoothed = kalmanFilterRef.current.update(rawX, rawY);
+
+            // Update position with smoothed estimates
             coordsRef.current = {
               ...coordsRef.current,
-              x: coordsRef.current.x + finalVx * dtSeconds,
-              y: coordsRef.current.y + finalVy * dtSeconds,
-              z: Math.max(0, altitude),
+              x: smoothed.x,
+              y: smoothed.y,
+              z: altitude, // Always 0 for ground-level navigation
               heading: flowHeading,
               vx: finalVx,
               vy: finalVy,
@@ -259,6 +269,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       // Reset state for new flight
       prevFeaturesRef.current = [];
       prevTimestampRef.current = 0;
+      kalmanFilterRef.current.reset(0, 0);
       coordsRef.current = { x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 };
       setCoordinates({ x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 });
 

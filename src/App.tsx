@@ -7,6 +7,7 @@ import { ControlsPanel } from './components/ControlsPanel';
 import { MenuBar } from './components/MenuBar';
 import { CameraFeed } from './components/CameraFeed';
 import { debugLogger } from './utils/debugLog';
+import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFlightCourseToStorage } from './utils/flightExport';
 import './App.css';
 
 const APP_VERSION = '2.4.0';
@@ -91,6 +92,72 @@ export function App() {
     debugLogger.log('info', 'Flight reset');
   };
 
+  const handleExportFlightCourse = () => {
+    if (trackHistory.length === 0) {
+      debugLogger.log('warn', 'No flight data to export');
+      alert('No flight data to export. Start a flight first.');
+      return;
+    }
+
+    const duration = flightStartTime > 0 ? Date.now() - flightStartTime : 0;
+    const distance = Math.sqrt(
+      camera.coordinates.x ** 2 + camera.coordinates.y ** 2
+    );
+
+    const jsonString = exportFlightCourse(
+      `Flight ${new Date().toLocaleString()}`,
+      trackHistory as any,
+      duration,
+      distance,
+      Math.max(...trackHistory.map(p => p.z), 0)
+    );
+
+    downloadFlightCourse(jsonString, `flight-${Date.now()}.json`);
+    saveFlightCourseToStorage({
+      id: `flight_${Date.now()}`,
+      name: `Flight ${new Date().toLocaleString()}`,
+      createdAt: Date.now(),
+      duration,
+      distance,
+      maxAltitude: Math.max(...trackHistory.map(p => p.z), 0),
+      points: trackHistory as any,
+    });
+
+    debugLogger.log('info', `Flight course exported: ${trackHistory.length} points`);
+    alert(`Flight exported: ${trackHistory.length} points, ${distance.toFixed(1)}m distance`);
+  };
+
+  const handleImportFlightCourse = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonString = event.target?.result as string;
+          const imported = importFlightCourse(jsonString);
+
+          if (!imported) {
+            alert('Invalid flight course file');
+            return;
+          }
+
+          debugLogger.log('info', `Flight course imported: ${imported.points.length} points`);
+          alert(`Flight imported: ${imported.points.length} points from ${imported.name}`);
+        } catch (err) {
+          debugLogger.log('error', `Import error: ${err}`);
+          alert('Failed to import flight course');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const elapsedMs = isFlying && flightStartTime > 0 ? Date.now() - flightStartTime : 0;
 
   return (
@@ -133,6 +200,8 @@ export function App() {
         onRecalibrate={() => {
           debugLogger.log('info', 'Camera recalibrated');
         }}
+        onExportFlightCourse={handleExportFlightCourse}
+        onImportFlightCourse={handleImportFlightCourse}
       />
     </div>
   );
