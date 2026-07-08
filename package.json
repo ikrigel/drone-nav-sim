@@ -1,7 +1,7 @@
 {
   "name": "drone-nav-sim",
   "description": "GPS-free drone navigation simulator using device orientation sensors",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "private": true,
   "type": "module",
   "scripts": {

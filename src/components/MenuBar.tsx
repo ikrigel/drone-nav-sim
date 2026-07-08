@@ -123,123 +123,206 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
         <Modal title="About" onClose={() => setShowAbout(false)}>
           <div className="modal-content about-content">
             <h3>Drone Navigation Simulator</h3>
-            <p>Version {version}</p>
+            <p><strong>Version {version}</strong> — Enhanced Documentation Release</p>
+
             <div className="about-text">
+              <h4>What Is This App?</h4>
               <p>
-                A real-time drone flight simulator using device sensors for navigation.
+                Turn your phone into a drone and navigate using <strong>camera-based position tracking</strong>.
+                This is <strong>NOT a flight game or simulation</strong>. Your phone IS the drone. Real camera analysis
+                calculates your movement in real-time.
               </p>
+
+              <h4>How It Works</h4>
               <p>
-                <strong>Features:</strong>
+                When you start a flight:
               </p>
+              <ol>
+                <li>App accesses your device camera</li>
+                <li>Detects features (corners, edges) in each frame</li>
+                <li>Tracks how features move between frames (optical flow)</li>
+                <li>Converts pixel movement → real-world speed using camera calibration</li>
+                <li>Calculates your position and heading in real-time</li>
+              </ol>
+              <p>Result: Position tracking without GPS, anywhere indoors or outdoors</p>
+
+              <h4>Core Features</h4>
               <ul>
-                <li>Accelerometer-based speed calculation</li>
-                <li>Camera-based altitude estimation</li>
-                <li>Real-time position tracking</li>
-                <li>Flight session recording</li>
+                <li>✅ <strong>Optical Flow Navigation</strong> — Camera-based movement detection</li>
+                <li>✅ <strong>Relative Altitude Tracking</strong> — Height from -1.5m to +1.5m</li>
+                <li>✅ <strong>Route Compression</strong> — 5-50x smaller files (coreset algorithm)</li>
+                <li>✅ <strong>Route Save/Load</strong> — Persist flights to localStorage</li>
+                <li>✅ <strong>Metric/Imperial Units</strong> — Switch between m/s & mph</li>
+                <li>✅ <strong>Kalman Filtering</strong> — Smooth position estimates</li>
+                <li>✅ <strong>Live Camera Feed</strong> — See camera stream during flight</li>
               </ul>
-              <p>
-                <strong>Sensors Used:</strong>
-              </p>
+
+              <h4>What Sensors Are Used?</h4>
               <ul>
-                <li>Compass (heading)</li>
-                <li>Accelerometer (speed/acceleration)</li>
-                <li>Gyroscope (rotation rates)</li>
-                <li>Camera (altitude estimation)</li>
+                <li>✅ <strong>Camera</strong> — Optical flow (movement detection)</li>
+                <li>✅ <strong>Compass</strong> — Heading direction</li>
+                <li>✅ <strong>Accelerometer</strong> — Speed estimation (future: IMU fusion)</li>
+                <li>❌ <strong>GPS</strong> — Not used (this is the whole point!)</li>
+                <li>❌ <strong>Wi-Fi/Bluetooth</strong> — Not used</li>
               </ul>
+
+              <h4>Privacy & Data</h4>
+              <ul>
+                <li>✅ All data stays on your device (localStorage)</li>
+                <li>✅ Camera feed never leaves your device</li>
+                <li>✅ No internet required (offline-first)</li>
+                <li>✅ No tracking, no analytics, no cookies</li>
+              </ul>
+
+              <h4>Recent Updates</h4>
+              <ul>
+                <li>v2.7.0 — Comprehensive documentation update</li>
+                <li>v2.6.0 — Relative altitude tracking (±1.5m range)</li>
+                <li>v2.5.0 — Coreset route compression (80-92% size reduction)</li>
+                <li>v2.4.0 — Live camera feed display</li>
+                <li>v2.3.0 — Unit conversion, responsive design fixes</li>
+              </ul>
+
+              <p style={{marginTop: '1em', fontSize: '0.9em', opacity: 0.8}}>
+                📖 See Help (❓) for detailed user guide • 💻 See docs/ directory for technical documentation
+              </p>
             </div>
           </div>
         </Modal>
       )}
 
       {showHelp && (
-        <Modal title="Help" onClose={() => setShowHelp(false)}>
+        <Modal title="Help & User Guide" onClose={() => setShowHelp(false)}>
           <div className="modal-content help-content">
-            <h3>Camera-Based Navigation</h3>
+            <h3>Camera-Based Navigation Guide</h3>
 
             <div className="help-section">
-              <h4>How It Works</h4>
-              <p>
-                This is <strong>not a simulation</strong>. Your phone IS the drone.
-                The camera analyzes real motion to calculate speed, altitude, and position.
-              </p>
-            </div>
-
-            <div className="help-section">
-              <h4>Getting Started</h4>
+              <h4>🎯 Getting Started (Quick Start)</h4>
               <ol>
-                <li>Tap <strong>"Start Flight"</strong> button to begin recording</li>
-                <li>Allow camera access when prompted</li>
-                <li>Move your phone smoothly:
-                  <ul>
-                    <li><strong>Pan forward/backward</strong> - Camera detects motion</li>
-                    <li><strong>Pan left/right</strong> - Lateral movement</li>
-                    <li><strong>Move up/down</strong> - Altitude change</li>
-                    <li><strong>Rotate</strong> - Changes heading direction</li>
-                  </ul>
-                </li>
-                <li>Camera analyzes optical flow to calculate speed</li>
-                <li>Feature tracking determines altitude from scene</li>
-                <li>Tap <strong>"Stop Flight"</strong> to end session</li>
+                <li>Tap <strong>"Enable Sensors"</strong> button</li>
+                <li>Grant camera permissions when prompted</li>
+                <li>Tap <strong>"Start Flight"</strong> to begin</li>
+                <li>Move your phone smoothly in any direction</li>
+                <li>Watch HUD display real-time data (HDG, SPD, ALT, etc.)</li>
+                <li>Watch FlightPlotter map show your trail</li>
+                <li>Tap <strong>"Stop Flight"</strong> when done</li>
               </ol>
             </div>
 
             <div className="help-section">
-              <h4>Real-Time Data Display</h4>
+              <h4>📊 Understanding HUD Display</h4>
+              <p><strong>Top Row (Position & Direction):</strong></p>
               <ul>
-                <li><strong>HDG</strong> - Heading (compass direction)</li>
-                <li><strong>SPD</strong> - Real speed in m/s (from optical flow)</li>
-                <li><strong>ALT</strong> - Altitude in meters (from scene depth)</li>
-                <li><strong>X, Y</strong> - Position coordinates from start</li>
-                <li><strong>FLOW</strong> - Optical flow magnitude (pixels)</li>
-                <li><strong>FEAT</strong> - Number of tracked features</li>
-                <li><strong>VX, VY</strong> - Velocity components</li>
+                <li><strong>HDG</strong> — Heading (0-360°): 0°=North, 90°=East, 180°=South, 270°=West</li>
+                <li><strong>SPD</strong> — Speed in meters/second: Walking ~1.4 m/s, Running ~3-5 m/s</li>
+                <li><strong>ALT</strong> — Altitude (-1.5m to +1.5m): +0.5=climbing stairs, -0.3=lowering phone</li>
+                <li><strong>X, Y</strong> — Position (meters from start): 0,0 is where you started</li>
+              </ul>
+              <p><strong>Bottom Row (Movement Details):</strong></p>
+              <ul>
+                <li><strong>TIME</strong> — Elapsed flight time (HH:MM:SS)</li>
+                <li><strong>DIST</strong> — Total distance traveled (meters)</li>
+                <li><strong>FLOW</strong> — Optical flow magnitude: higher = faster movement</li>
+                <li><strong>VX, VY</strong> — Velocity components in X and Y directions</li>
+                <li><strong>FEAT</strong> — Feature count: 10-50=good, 100+=excellent, &lt;10=bad</li>
               </ul>
             </div>
 
             <div className="help-section">
-              <h4>How Camera Calculates Speed</h4>
+              <h4>🗺️ FlightPlotter Map (Top-Down View)</h4>
+              <ul>
+                <li><strong>Center crosshairs</strong> — Your current position</li>
+                <li><strong>Blue dot</strong> — Starting point (0, 0)</li>
+                <li><strong>Connected line</strong> — Your route trail</li>
+                <li><strong>Range rings</strong> — 50m and 100m circles from start</li>
+                <li><strong>Arrow</strong> — Your heading direction</li>
+                <li><strong>Coordinate grid</strong> — X/Y position labels</li>
+              </ul>
+              <p><strong>How to read:</strong> Top of map = North, Right = East, Bottom = South, Left = West</p>
+            </div>
+
+            <div className="help-section">
+              <h4>⚙️ Settings & Options</h4>
+              <ul>
+                <li><strong>Font Size</strong> — Adjust for readability (Small to XXL)</li>
+                <li><strong>Units</strong> — Choose metric (m/s, meters) or imperial (mph, feet)</li>
+                <li><strong>Camera View</strong> — Toggle live camera feed display</li>
+                <li><strong>Debug Logging</strong> — Enable console logs (F12) for diagnostics</li>
+              </ul>
+            </div>
+
+            <div className="help-section">
+              <h4>💾 Export & Import Routes</h4>
+              <p>After stopping a flight:</p>
+              <ul>
+                <li><strong>💾 Export</strong> — Download route as JSON file (includes compression stats)</li>
+                <li><strong>📥 Import</strong> — Load a previously saved flight JSON file</li>
+                <li>File size reduction: 5000 points → 600KB → compressed: 48KB (92% smaller!)</li>
+              </ul>
+            </div>
+
+            <div className="help-section">
+              <h4>🎯 Before You Start</h4>
+              <ul>
+                <li>💡 <strong>Good Lighting</strong> — See scene features clearly, avoid backlighting</li>
+                <li>🏠 <strong>Textured Scene</strong> — Indoor spaces (walls, doors, windows) work best</li>
+                <li>🤳 <strong>Stable Holding</strong> — Don't shake camera, use smooth controlled movements</li>
+                <li>🔍 <strong>Clear Path</strong> — Remove obstacles, don't point at blank walls</li>
+              </ul>
+            </div>
+
+            <div className="help-section">
+              <h4>✅ During Flight</h4>
+              <ul>
+                <li>🚶 <strong>Start Slowly</strong> — First seconds calibrate camera, walk slowly for first 10m</li>
+                <li>➡️ <strong>Smooth Movements</strong> — Avoid jerky motions, constant direction works better</li>
+                <li>👀 <strong>Keep Features in View</strong> — Don't point at blank walls or bright lights</li>
+                <li>📊 <strong>Watch FEAT Count</strong> — &lt;10=reposition, 50+=good, 100=excellent</li>
+                <li>⬆️ <strong>Use Elevation Changes</strong> — Climb stairs for ALT increase, lower phone for decrease</li>
+              </ul>
+            </div>
+
+            <div className="help-section">
+              <h4>🔧 Technical: How Camera Calculates Speed</h4>
               <p>
-                The camera detects features (corners, edges) and tracks how they move between frames.
-                This optical flow is converted to real-world speed using:
+                Camera detects features and tracks pixel movement:
               </p>
-              <p style={{fontSize: '0.9em', fontFamily: 'monospace'}}>
+              <p style={{fontSize: '0.85em', fontFamily: 'monospace', background: '#f0f0f0', padding: '8px', borderRadius: '4px'}}>
                 speed = (pixel_flow × altitude) / focal_length
               </p>
               <p>
-                Altitude is estimated from feature positions relative to the horizon.
+                Altitude estimated from feature positions. Kalman filtering smooths estimates to reduce noise.
               </p>
             </div>
 
             <div className="help-section">
-              <h4>Camera Calibration</h4>
+              <h4>❓ Troubleshooting</h4>
               <ul>
-                <li>Auto-estimates camera intrinsics on first flight</li>
-                <li>Focal length and principal point are calculated</li>
-                <li>Calibration persists in browser storage</li>
-                <li>Improves accuracy with each flight</li>
+                <li>❌ <strong>"Map Not Drawing"</strong> — Check console (F12), grant camera permission, try different lighting</li>
+                <li>❌ <strong>FEAT &lt;10</strong> — Need better lighting or textured scene, try indoors</li>
+                <li>❌ <strong>Position Drifts</strong> — Expected with camera tracking, shorter flights more accurate</li>
+                <li>❌ <strong>Camera Permission Denied</strong> — Check browser privacy settings, try different browser</li>
+                <li>❌ <strong>Altitude at 0</strong> — Point camera at angled surfaces, need vertical variation</li>
               </ul>
             </div>
 
             <div className="help-section">
-              <h4>Tips for Best Results</h4>
-              <ul>
-                <li>Move slowly and smoothly for accurate tracking</li>
-                <li>Point camera at textured scenes (not blank walls)</li>
-                <li>Keep consistent lighting during flight</li>
-                <li>More features detected = better accuracy</li>
-                <li>Open browser console (F12) to enable debug mode</li>
-              </ul>
+              <h4>💻 Debug Mode</h4>
+              <p>
+                Enable debug logging in Settings → Debug Logging to see detailed calculations.
+              </p>
+              <p>
+                Open browser console (F12) and type <code>debug.status()</code> to check level.
+              </p>
+              <p>
+                Log levels: Trace (most verbose) → Debug → Info → Warn → Error (least verbose)
+              </p>
             </div>
 
-            <div className="help-section">
-              <h4>Debug Mode</h4>
-              <p>
-                Enable debug logging in Settings to see detailed calculations in browser console.
-              </p>
-              <p>
-                Type <code>debug.status()</code> in console (F12) to check debug level.
-              </p>
-            </div>
+            <p style={{marginTop: '1em', fontSize: '0.9em', opacity: 0.8, borderTop: '1px solid #ccc', paddingTop: '1em'}}>
+              📖 See full documentation at: docs/help.md and docs/about.md<br/>
+              🐛 Report bugs: Check ROUTE_STABILITY_INVESTIGATION.md
+            </p>
           </div>
         </Modal>
       )}
