@@ -53,55 +53,76 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
   const startCamera = useCallback(async () => {
     try {
+      log.info('Requesting camera access...');
+
       if (!navigator.mediaDevices?.getUserMedia) {
-        log.warn('Camera not available');
+        log.error('Camera API not available - getUserMedia not supported');
         return;
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 640 }, height: { ideal: 480 } },
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
         audio: false,
       });
 
+      log.info('Camera stream obtained');
       streamRef.current = stream;
 
       if (!videoRef.current) {
         videoRef.current = document.createElement('video');
         videoRef.current.style.display = 'none';
+        videoRef.current.setAttribute('autoplay', 'true');
+        videoRef.current.setAttribute('playsinline', 'true');
         document.body.appendChild(videoRef.current);
+        log.debug('Video element created');
       }
 
       if (!canvasRef.current) {
         canvasRef.current = document.createElement('canvas');
         canvasRef.current.style.display = 'none';
         document.body.appendChild(canvasRef.current);
+        log.debug('Canvas element created');
       }
 
       videoRef.current.srcObject = stream;
-      videoRef.current.play();
+      const playPromise = videoRef.current.play();
 
-      // Wait for video to be ready
-      await new Promise(resolve => {
-        const checkReady = () => {
-          if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
-            resolve(true);
-          } else {
-            setTimeout(checkReady, 100);
-          }
-        };
-        checkReady();
-      });
+      if (playPromise !== undefined) {
+        await playPromise;
+        log.debug('Video playback started');
+      }
+
+      // Wait for video to be ready with timeout
+      let ready = false;
+      for (let i = 0; i < 50; i++) {
+        if (videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA) {
+          ready = true;
+          log.debug('Video ready');
+          break;
+        }
+        await new Promise(r => setTimeout(r, 100));
+      }
+
+      if (!ready) {
+        log.warn('Video not ready after 5 seconds, proceeding anyway');
+      }
 
       // Initialize calibration
       const calib = loadOrCreateCalibration(videoRef.current);
       setCalibration(calib);
+      log.info('Camera ready - calibration loaded');
 
-      log.info('Camera started - calibration loaded');
-
-      // Start processing loop
-      processFrame();
-    } catch (err) {
-      log.error(`Camera error: ${err}`);
+    } catch (err: any) {
+      log.error(`Camera access denied or error: ${err?.message || err}`);
+      if (err?.name === 'NotAllowedError') {
+        log.error('Camera permission denied by user');
+      } else if (err?.name === 'NotFoundError') {
+        log.error('No camera device found');
+      }
     }
   }, []);
 
@@ -211,20 +232,37 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
   }, [calibration, isNavigating]);
 
   useEffect(() => {
-    if (isNavigating) {
-      startCamera();
-      // Start continuous frame processing
+    if (isNavigating && calibration) {
+      // Reset state for new flight
       prevFeaturesRef.current = [];
       prevTimestampRef.current = 0;
+      coordsRef.current = { x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 };
+      setCoordinates({ x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 });
+
+      log.info('Starting frame processing');
+      // Start continuous frame processing
       animationFrameRef.current = requestAnimationFrame(processFrame);
+    } else if (isNavigating && !calibration) {
+      // Calibration not ready yet, wait
+      log.debug('Waiting for calibration...');
     } else {
       stopCamera();
     }
 
     return () => {
-      stopCamera();
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
-  }, [isNavigating, startCamera, stopCamera, processFrame]);
+  }, [isNavigating, calibration, processFrame, stopCamera]);
+
+  // Separate effect to start camera when navigating
+  useEffect(() => {
+    if (isNavigating && !calibration) {
+      log.info('Navigation started - initializing camera');
+      startCamera();
+    }
+  }, [isNavigating, calibration, startCamera]);
 
   return {
     coordinates,
