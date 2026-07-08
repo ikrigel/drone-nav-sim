@@ -8,7 +8,7 @@ import { MenuBar } from './components/MenuBar';
 import { debugLogger } from './utils/debugLog';
 import './App.css';
 
-const APP_VERSION = '2.1.0';
+const APP_VERSION = '2.2.0';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
