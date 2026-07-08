@@ -121,50 +121,90 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, version }: 
       {showHelp && (
         <Modal title="Help" onClose={() => setShowHelp(false)}>
           <div className="modal-content help-content">
-            <h3>How to Use</h3>
+            <h3>Camera-Based Navigation</h3>
+
+            <div className="help-section">
+              <h4>How It Works</h4>
+              <p>
+                This is <strong>not a simulation</strong>. Your phone IS the drone.
+                The camera analyzes real motion to calculate speed, altitude, and position.
+              </p>
+            </div>
 
             <div className="help-section">
               <h4>Getting Started</h4>
               <ol>
-                <li>Tap "Enable Sensors" to request device permissions</li>
-                <li>Tap "Start Flight" to begin recording</li>
-                <li>Move your device to simulate flight:
+                <li>Tap <strong>"Start Flight"</strong> button to begin recording</li>
+                <li>Allow camera access when prompted</li>
+                <li>Move your phone smoothly:
                   <ul>
-                    <li><strong>Tilt forward/back</strong> - Accelerate forward/back</li>
-                    <li><strong>Tilt left/right</strong> - Accelerate left/right</li>
-                    <li><strong>Roll device</strong> - Vertical acceleration</li>
-                    <li><strong>Rotate device</strong> - Change heading (compass)</li>
+                    <li><strong>Pan forward/backward</strong> - Camera detects motion</li>
+                    <li><strong>Pan left/right</strong> - Lateral movement</li>
+                    <li><strong>Move up/down</strong> - Altitude change</li>
+                    <li><strong>Rotate</strong> - Changes heading direction</li>
                   </ul>
                 </li>
-                <li>Tap "Stop Flight" to end the session</li>
+                <li>Camera analyzes optical flow to calculate speed</li>
+                <li>Feature tracking determines altitude from scene</li>
+                <li>Tap <strong>"Stop Flight"</strong> to end session</li>
               </ol>
             </div>
 
             <div className="help-section">
-              <h4>Understanding the Display</h4>
+              <h4>Real-Time Data Display</h4>
               <ul>
-                <li><strong>Radar Plot</strong> - Top-down view of your flight path</li>
-                <li><strong>Arrow</strong> - Your current heading (direction)</li>
-                <li><strong>HUD</strong> - Real-time telemetry (speed, altitude, time)</li>
+                <li><strong>HDG</strong> - Heading (compass direction)</li>
+                <li><strong>SPD</strong> - Real speed in m/s (from optical flow)</li>
+                <li><strong>ALT</strong> - Altitude in meters (from scene depth)</li>
+                <li><strong>X, Y</strong> - Position coordinates from start</li>
+                <li><strong>FLOW</strong> - Optical flow magnitude (pixels)</li>
+                <li><strong>FEAT</strong> - Number of tracked features</li>
+                <li><strong>VX, VY</strong> - Velocity components</li>
               </ul>
             </div>
 
             <div className="help-section">
-              <h4>Sensors & Data</h4>
+              <h4>How Camera Calculates Speed</h4>
+              <p>
+                The camera detects features (corners, edges) and tracks how they move between frames.
+                This optical flow is converted to real-world speed using:
+              </p>
+              <p style={{fontSize: '0.9em', fontFamily: 'monospace'}}>
+                speed = (pixel_flow × altitude) / focal_length
+              </p>
+              <p>
+                Altitude is estimated from feature positions relative to the horizon.
+              </p>
+            </div>
+
+            <div className="help-section">
+              <h4>Camera Calibration</h4>
               <ul>
-                <li><strong>Speed</strong> - Calculated from accelerometer</li>
-                <li><strong>Altitude</strong> - Estimated from camera brightness</li>
-                <li><strong>Position</strong> - Integrated from acceleration</li>
+                <li>Auto-estimates camera intrinsics on first flight</li>
+                <li>Focal length and principal point are calculated</li>
+                <li>Calibration persists in browser storage</li>
+                <li>Improves accuracy with each flight</li>
+              </ul>
+            </div>
+
+            <div className="help-section">
+              <h4>Tips for Best Results</h4>
+              <ul>
+                <li>Move slowly and smoothly for accurate tracking</li>
+                <li>Point camera at textured scenes (not blank walls)</li>
+                <li>Keep consistent lighting during flight</li>
+                <li>More features detected = better accuracy</li>
+                <li>Open browser console (F12) to enable debug mode</li>
               </ul>
             </div>
 
             <div className="help-section">
               <h4>Debug Mode</h4>
               <p>
-                Enable debug logging in Settings to see detailed sensor data in the browser console (F12).
+                Enable debug logging in Settings to see detailed calculations in browser console.
               </p>
               <p>
-                Type <code>debug.status()</code> in console to check current debug level.
+                Type <code>debug.status()</code> in console (F12) to check debug level.
               </p>
             </div>
           </div>

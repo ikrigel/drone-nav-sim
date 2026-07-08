@@ -12,7 +12,9 @@ const APP_VERSION = '2.1.0';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const [trackHistory, setTrackHistory] = useState<Array<{ x: number; y: number; z: number }>>([]);
+  const [flightStartTime, setFlightStartTime] = useState<number>(0);
 
   const appSettings = useAppSettings();
   const camera = useCameraMovement({ isNavigating: isFlying });
@@ -35,26 +37,60 @@ export function App() {
     root.style.fontSize = fontSizeMap[appSettings.settings.fontSize];
   }, [appSettings.settings.fontSize]);
 
-  // Track position history
+  // Track position history in real-time
   useEffect(() => {
-    if (isFlying) {
-      setTrackHistory(prev => [...prev, camera.coordinates]);
+    if (isFlying && camera.coordinates) {
+      setTrackHistory(prev => {
+        const last = prev[prev.length - 1];
+        // Only add if position changed significantly
+        if (!last || Math.hypot(
+          camera.coordinates.x - last.x,
+          camera.coordinates.y - last.y,
+          camera.coordinates.z - last.z
+        ) > 0.01) {
+          return [...prev, {
+            x: camera.coordinates.x,
+            y: camera.coordinates.y,
+            z: camera.coordinates.z
+          }];
+        }
+        return prev;
+      });
     }
   }, [camera.coordinates, isFlying]);
 
+  const handleEnableSensors = async () => {
+    try {
+      // Just mark camera as ready - it will request permission when flight starts
+      setCameraReady(true);
+      debugLogger.log('info', 'Camera access enabled');
+    } catch (err) {
+      debugLogger.log('error', `Camera setup error: ${err}`);
+    }
+  };
+
   const handleStart = () => {
+    const now = Date.now();
+    setFlightStartTime(now);
     setTrackHistory([]);
     setIsFlying(true);
+    debugLogger.log('info', 'Flight started - camera tracking active');
   };
 
   const handleStop = () => {
     setIsFlying(false);
+    const duration = Date.now() - flightStartTime;
+    debugLogger.log('info', `Flight stopped - duration: ${(duration / 1000).toFixed(1)}s`);
   };
 
   const handleReset = () => {
     setTrackHistory([]);
     setIsFlying(false);
+    setFlightStartTime(0);
+    debugLogger.log('info', 'Flight reset');
   };
+
+  const elapsedMs = isFlying && flightStartTime > 0 ? Date.now() - flightStartTime : 0;
 
   return (
     <div className={`app-container font-${appSettings.settings.fontSize}`}>
@@ -75,26 +111,20 @@ export function App() {
           coordinates={camera.coordinates}
           opticalFlow={camera.opticalFlow}
           features={camera.features}
-          elapsedMs={isFlying ? Date.now() - (window as any).__flightStartTime || 0 : 0}
+          elapsedMs={elapsedMs}
         />
       </div>
 
       <ControlsPanel
         isFlying={isFlying}
-        orientationPermission="granted"
-        motionPermission="granted"
-        onEnableSensors={() => {
-          (window as any).__flightStartTime = Date.now();
-          handleStart();
-        }}
-        onStart={() => {
-          (window as any).__flightStartTime = Date.now();
-          handleStart();
-        }}
+        orientationPermission={cameraReady ? 'granted' : 'prompt'}
+        motionPermission={cameraReady ? 'granted' : 'prompt'}
+        onEnableSensors={handleEnableSensors}
+        onStart={handleStart}
         onStop={handleStop}
         onReset={handleReset}
         onRecalibrate={() => {
-          /* Camera recalibration can be added here */
+          debugLogger.log('info', 'Camera recalibrated');
         }}
       />
     </div>

@@ -124,10 +124,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
   }, []);
 
   const processFrame = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current || !calibration) {
-      if (isNavigating) {
-        animationFrameRef.current = requestAnimationFrame(processFrame);
-      }
+    if (!videoRef.current || !canvasRef.current || !calibration || !isNavigating) {
       return;
     }
 
@@ -161,42 +158,46 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
         if (prevTimestampRef.current > 0) {
           const dtSeconds = (timestamp - prevTimestampRef.current) / 1000;
 
-          // Estimate altitude from feature positions
-          const altitude = estimateAltitudeFromFeatures(
-            currFeatures,
-            canvas.height,
-            calibration.focalLengthY
-          );
+          if (dtSeconds > 0 && dtSeconds < 1) {
+            // Estimate altitude from feature positions
+            const altitude = estimateAltitudeFromFeatures(
+              currFeatures,
+              canvas.height,
+              calibration.focalLengthY
+            );
 
-          // Calculate speed from optical flow
-          const speed = opticalFlowToSpeed(
-            flow.magnitude,
-            dtSeconds,
-            altitude,
-            calibration.focalLengthY
-          );
+            // Calculate speed from optical flow
+            const speed = opticalFlowToSpeed(
+              flow.magnitude,
+              dtSeconds,
+              altitude,
+              calibration.focalLengthY
+            );
 
-          // Update velocity
-          const vx = Math.cos(flow.angle) * speed;
-          const vy = Math.sin(flow.angle) * speed;
+            // Update velocity based on flow angle and device heading
+            const flowHeading = (flow.angle * 180 / Math.PI + 360) % 360;
+            const vx = Math.sin((flowHeading * Math.PI) / 180) * speed;
+            const vy = Math.cos((flowHeading * Math.PI) / 180) * speed;
 
-          coordsRef.current = {
-            ...coordsRef.current,
-            x: coordsRef.current.x + vx * dtSeconds,
-            y: coordsRef.current.y + vy * dtSeconds,
-            z: altitude,
-            heading: flow.angle * (180 / Math.PI),
-            vx,
-            vy,
-            vz: 0,
-          };
+            // Update position
+            coordsRef.current = {
+              ...coordsRef.current,
+              x: coordsRef.current.x + vx * dtSeconds,
+              y: coordsRef.current.y + vy * dtSeconds,
+              z: Math.max(0, altitude),
+              heading: flowHeading,
+              vx,
+              vy,
+              vz: 0,
+            };
 
-          setCoordinates({ ...coordsRef.current });
+            setCoordinates({ ...coordsRef.current });
 
-          log.debug(
-            `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
-              `vel=(${vx.toFixed(2)}, ${vy.toFixed(2)}) speed=${speed.toFixed(2)} m/s alt=${altitude.toFixed(1)}m`
-          );
+            log.debug(
+              `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
+              `vel=(${vx.toFixed(2)}, ${vy.toFixed(2)}) speed=${speed.toFixed(2)} m/s alt=${altitude.toFixed(1)}m features=${currFeatures.length}`
+            );
+          }
         }
       }
 
@@ -206,14 +207,16 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       log.error(`Frame processing error: ${err}`);
     }
 
-    if (isNavigating) {
-      animationFrameRef.current = requestAnimationFrame(processFrame);
-    }
+    animationFrameRef.current = requestAnimationFrame(processFrame);
   }, [calibration, isNavigating]);
 
   useEffect(() => {
     if (isNavigating) {
       startCamera();
+      // Start continuous frame processing
+      prevFeaturesRef.current = [];
+      prevTimestampRef.current = 0;
+      animationFrameRef.current = requestAnimationFrame(processFrame);
     } else {
       stopCamera();
     }
@@ -221,7 +224,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     return () => {
       stopCamera();
     };
-  }, [isNavigating, startCamera, stopCamera]);
+  }, [isNavigating, startCamera, stopCamera, processFrame]);
 
   return {
     coordinates,
