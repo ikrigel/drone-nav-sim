@@ -6,6 +6,11 @@
 
 html {
   font-size: 16px;
+  --font-scale-small: 0.875;
+  --font-scale-medium: 1;
+  --font-scale-large: 1.125;
+  --font-scale-xl: 1.25;
+  --font-scale-xxl: 1.5;
 }
 
 body {
@@ -30,6 +35,7 @@ body {
   width: 100%;
   height: 100%;
   background: #1a1a2e;
+  font-size: calc(16px * var(--font-scale-medium));
 }
 
 .flight-view {
@@ -41,29 +47,34 @@ body {
   flex-direction: column;
 }
 
-/* Font size scaling */
+/* Font size scaling - using CSS custom properties */
 .app-container.font-small {
-  font-size: 14px;
+  --current-scale: var(--font-scale-small);
+  font-size: calc(16px * var(--current-scale));
 }
 
 .app-container.font-medium {
-  font-size: 16px;
+  --current-scale: var(--font-scale-medium);
+  font-size: calc(16px * var(--current-scale));
 }
 
 .app-container.font-large {
-  font-size: 18px;
+  --current-scale: var(--font-scale-large);
+  font-size: calc(16px * var(--current-scale));
 }
 
 .app-container.font-xl {
-  font-size: 20px;
+  --current-scale: var(--font-scale-xl);
+  font-size: calc(16px * var(--current-scale));
 }
 
 .app-container.font-xxl {
-  font-size: 24px;
+  --current-scale: var(--font-scale-xxl);
+  font-size: calc(16px * var(--current-scale));
 }
 
-/* Responsive design */
-@media (max-width: 1000px) {
+/* Base responsive adjustments for small screens */
+@media (max-width: 900px) {
   html {
     font-size: 15px;
   }
@@ -73,26 +84,16 @@ body {
   html {
     font-size: 14px;
   }
-
-  body {
-    font-size: 12px;
-  }
-
-  .app-container {
-    font-size: 14px;
-  }
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
   html {
     font-size: 13px;
   }
+}
 
-  body {
-    font-size: 11px;
-  }
-
-  .app-container {
-    font-size: 13px;
+@media (max-width: 360px) {
+  html {
+    font-size: 12px;
   }
 }
