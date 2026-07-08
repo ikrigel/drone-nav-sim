@@ -5,10 +5,11 @@ import { FlightPlotter } from './components/FlightPlotter';
 import { HUDOverlay } from './components/HUDOverlay';
 import { ControlsPanel } from './components/ControlsPanel';
 import { MenuBar } from './components/MenuBar';
+import { CameraFeed } from './components/CameraFeed';
 import { debugLogger } from './utils/debugLog';
 import './App.css';
 
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.4.0';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
@@ -113,6 +114,10 @@ export function App() {
           opticalFlow={camera.opticalFlow}
           features={camera.features}
           elapsedMs={elapsedMs}
+        />
+        <CameraFeed
+          isVisible={appSettings.settings.showCamera && isFlying}
+          stream={camera.stream}
         />
       </div>
 

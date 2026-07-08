@@ -271,5 +271,6 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     calibration,
     startCamera,
     stopCamera,
+    stream: streamRef.current,
   };
 }
