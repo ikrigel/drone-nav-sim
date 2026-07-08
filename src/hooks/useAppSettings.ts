@@ -10,6 +10,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   },
 };
 
+type FontSize = 'small' | 'medium' | 'large' | 'xl' | 'xxl';
+
 export function useAppSettings() {
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
@@ -27,7 +29,7 @@ export function useAppSettings() {
     });
   }, []);
 
-  const setFontSize = useCallback((size: 'small' | 'medium' | 'large') => {
+  const setFontSize = useCallback((size: FontSize) => {
     updateSettings({ fontSize: size });
   }, [updateSettings]);
 

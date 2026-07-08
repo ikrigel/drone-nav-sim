@@ -1,23 +1,18 @@
-import type { DeviceMotionState } from '../types';
+import type { DroneCoordinates, OpticalFlowVector, CameraFeature } from '../types';
 import './HUDOverlay.css';
 
 interface HUDOverlayProps {
-  heading: number | null;
-  pitch: number | null;
-  roll: number | null;
-  speed: number;
-  altitude: number;
+  coordinates: DroneCoordinates;
+  opticalFlow: OpticalFlowVector;
+  features: CameraFeature[];
   elapsedMs: number;
-  totalDistance: number;
-  maxAltitude: number;
-  accel: DeviceMotionState;
 }
 
 const COMPASS_LABELS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
-function getCompassLabel(heading: number | null): string {
-  if (heading === null) return '---';
-  const index = Math.round((heading % 360) / 45) % 8;
+function getCompassLabel(heading: number): string {
+  const normalized = ((heading % 360) + 360) % 360;
+  const index = Math.round(normalized / 45) % 8;
   return COMPASS_LABELS[index];
 }
 
@@ -30,41 +25,39 @@ function formatTime(ms: number): string {
 }
 
 export function HUDOverlay({
-  heading,
-  pitch,
-  roll,
-  speed,
-  altitude,
+  coordinates,
+  opticalFlow,
+  features,
   elapsedMs,
-  totalDistance,
-  maxAltitude,
-  accel,
 }: HUDOverlayProps) {
+  const speed = Math.sqrt(coordinates.vx ** 2 + coordinates.vy ** 2);
+  const distance = Math.sqrt(coordinates.x ** 2 + coordinates.y ** 2);
+
   return (
     <div className="hud-overlay">
       <div className="hud-top">
         <div className="hud-stat">
           <div className="hud-label">HDG</div>
           <div className="hud-value">
-            {heading !== null ? `${heading.toFixed(0)}°` : '---°'}
-            <span className="hud-compass">{getCompassLabel(heading)}</span>
+            {`${coordinates.heading.toFixed(0)}°`}
+            <span className="hud-compass">{getCompassLabel(coordinates.heading)}</span>
           </div>
         </div>
         <div className="hud-stat">
-          <div className="hud-label">PITCH</div>
-          <div className="hud-value">{pitch !== null ? `${pitch.toFixed(0)}°` : '---°'}</div>
-        </div>
-        <div className="hud-stat">
-          <div className="hud-label">ROLL</div>
-          <div className="hud-value">{roll !== null ? `${roll.toFixed(0)}°` : '---°'}</div>
-        </div>
-        <div className="hud-stat">
           <div className="hud-label">SPD</div>
-          <div className="hud-value">{speed.toFixed(1)} m/s</div>
+          <div className="hud-value">{speed.toFixed(2)} m/s</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">ALT</div>
-          <div className="hud-value">{altitude.toFixed(1)} m</div>
+          <div className="hud-value">{coordinates.z.toFixed(1)} m</div>
+        </div>
+        <div className="hud-stat">
+          <div className="hud-label">X</div>
+          <div className="hud-value">{coordinates.x.toFixed(1)} m</div>
+        </div>
+        <div className="hud-stat">
+          <div className="hud-label">Y</div>
+          <div className="hud-value">{coordinates.y.toFixed(1)} m</div>
         </div>
       </div>
 
@@ -75,23 +68,23 @@ export function HUDOverlay({
         </div>
         <div className="hud-stat">
           <div className="hud-label">DIST</div>
-          <div className="hud-value">{totalDistance.toFixed(1)} m</div>
+          <div className="hud-value">{distance.toFixed(1)} m</div>
         </div>
         <div className="hud-stat">
-          <div className="hud-label">MAXALT</div>
-          <div className="hud-value">{maxAltitude.toFixed(1)} m</div>
+          <div className="hud-label">FLOW</div>
+          <div className="hud-value">{opticalFlow.magnitude.toFixed(1)} px</div>
         </div>
         <div className="hud-stat">
-          <div className="hud-label">ACC-X</div>
-          <div className="hud-value">{accel.accelX !== null ? `${accel.accelX.toFixed(1)}` : '---'}</div>
+          <div className="hud-label">VX</div>
+          <div className="hud-value">{coordinates.vx.toFixed(2)} m/s</div>
         </div>
         <div className="hud-stat">
-          <div className="hud-label">ACC-Y</div>
-          <div className="hud-value">{accel.accelY !== null ? `${accel.accelY.toFixed(1)}` : '---'}</div>
+          <div className="hud-label">VY</div>
+          <div className="hud-value">{coordinates.vy.toFixed(2)} m/s</div>
         </div>
         <div className="hud-stat">
-          <div className="hud-label">ACC-Z</div>
-          <div className="hud-value">{accel.accelZ !== null ? `${accel.accelZ.toFixed(1)}` : '---'}</div>
+          <div className="hud-label">FEAT</div>
+          <div className="hud-value">{features.length} pts</div>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
-import type { TrackPoint, FlightState } from '../types';
+import type { DroneCoordinates } from '../types';
 
 interface FlightPlotterProps {
-  position: FlightState;
-  trackPoints: TrackPoint[];
-  heading: number | null;
+  position: DroneCoordinates;
+  trackPoints: Array<{ x: number; y: number; z: number }>;
+  heading: number;
 }
 
 export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterProps) {
@@ -34,12 +34,12 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
     ctx.fillRect(0, 0, width, height);
 
     // Calculate scale (pixels per meter)
-    let scale = 1;
-    if (trackPoints.length > 0) {
+    let scale = 2; // Start with 2 pixels per meter
+    if (trackPoints.length > 1) {
       const bounds = getBounds(trackPoints);
       const maxDim = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
       if (maxDim > 0) {
-        scale = (Math.min(width, height) * 0.8) / maxDim;
+        scale = Math.min(5, (Math.min(width, height) * 0.8) / maxDim);
       }
     }
 
@@ -47,7 +47,7 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
     drawRangeRings(ctx, centerX, centerY, width, height, scale);
 
     // Draw track trail
-    if (trackPoints.length > 1) {
+    if (trackPoints.length > 0) {
       ctx.strokeStyle = '#00ff00';
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -58,16 +58,28 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         ctx.lineTo(centerX + (p.y - position.y) * scale, centerY + (p.x - position.x) * scale);
       }
       ctx.stroke();
+
+      // Draw waypoints as circles
+      ctx.fillStyle = '#00ff00';
+      for (let i = 0; i < trackPoints.length; i += Math.max(1, Math.floor(trackPoints.length / 20))) {
+        const p = trackPoints[i];
+        const x = centerX + (p.y - position.y) * scale;
+        const y = centerY + (p.x - position.x) * scale;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // Draw current position marker (arrow pointing in heading direction)
     drawMarker(ctx, centerX, centerY, heading);
 
-    // Draw altitude indicator (responsive font size)
+    // Draw altitude and coordinates
     const altFontSize = Math.max(10, Math.min(14, width / 50));
     ctx.fillStyle = '#aaa';
     ctx.font = `${altFontSize}px monospace`;
     ctx.fillText(`ALT: ${position.z.toFixed(1)}m`, 10, height - 10);
+    ctx.fillText(`POS: (${position.x.toFixed(1)}, ${position.y.toFixed(1)})m`, 10, height - 25);
   }, [position, trackPoints, heading]);
 
   return (
@@ -83,7 +95,7 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
   );
 }
 
-function getBounds(points: TrackPoint[]) {
+function getBounds(points: Array<{ x: number; y: number; z: number }>) {
   let minX = Infinity,
     maxX = -Infinity,
     minY = Infinity,

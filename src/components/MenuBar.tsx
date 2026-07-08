@@ -4,7 +4,7 @@ import './MenuBar.css';
 
 interface MenuBarProps {
   settings: AppSettings;
-  onFontSizeChange: (size: 'small' | 'medium' | 'large') => void;
+  onFontSizeChange: (size: 'small' | 'medium' | 'large' | 'xl' | 'xxl') => void;
   onDebugChange: (debug: Partial<DebugSettings>) => void;
   version: string;
 }
@@ -34,13 +34,13 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, version }: 
             <div className="setting-group">
               <label>Font Size</label>
               <div className="font-size-options">
-                {(['small', 'medium', 'large'] as const).map(size => (
+                {(['small', 'medium', 'large', 'xl', 'xxl'] as const).map(size => (
                   <button
                     key={size}
                     className={`option-btn ${settings.fontSize === size ? 'active' : ''}`}
                     onClick={() => onFontSizeChange(size)}
                   >
-                    {size.charAt(0).toUpperCase() + size.slice(1)}
+                    {size === 'xl' ? 'XL' : size === 'xxl' ? 'XXL' : size.charAt(0).toUpperCase() + size.slice(1)}
                   </button>
                 ))}
               </div>
