@@ -18,6 +18,7 @@
   justify-content: space-around;
   align-items: flex-start;
   padding: 12px;
+  padding-top: 62px;
   background: rgba(0, 0, 0, 0.4);
   gap: 12px;
   flex: 0 0 auto;

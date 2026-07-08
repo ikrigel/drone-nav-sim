@@ -60,6 +60,8 @@ export interface DebugSettings {
 export interface AppSettings {
   fontSize: 'small' | 'medium' | 'large' | 'xl' | 'xxl';
   debug: DebugSettings;
+  units: 'metric' | 'imperial';
+  showCamera: boolean;
 }
 
 export interface CameraCalibration {

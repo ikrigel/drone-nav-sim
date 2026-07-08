@@ -6,10 +6,11 @@ interface MenuBarProps {
   settings: AppSettings;
   onFontSizeChange: (size: 'small' | 'medium' | 'large' | 'xl' | 'xxl') => void;
   onDebugChange: (debug: Partial<DebugSettings>) => void;
+  onSettingsChange: (settings: Partial<AppSettings>) => void;
   version: string;
 }
 
-export function MenuBar({ settings, onFontSizeChange, onDebugChange, version }: MenuBarProps) {
+export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsChange, version }: MenuBarProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -43,6 +44,38 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, version }: 
                     {size === 'xl' ? 'XL' : size === 'xxl' ? 'XXL' : size.charAt(0).toUpperCase() + size.slice(1)}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            <div className="setting-group">
+              <label>Units</label>
+              <div className="unit-options">
+                <button
+                  className={`option-btn ${settings.units === 'metric' ? 'active' : ''}`}
+                  onClick={() => onSettingsChange({ units: 'metric' })}
+                >
+                  Metric (m, m/s)
+                </button>
+                <button
+                  className={`option-btn ${settings.units === 'imperial' ? 'active' : ''}`}
+                  onClick={() => onSettingsChange({ units: 'imperial' })}
+                >
+                  Imperial (ft, mph)
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-group">
+              <label>Camera View</label>
+              <div className="debug-options">
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={settings.showCamera}
+                    onChange={(e) => onSettingsChange({ showCamera: e.target.checked })}
+                  />
+                  <span>Show Live Camera Feed</span>
+                </label>
               </div>
             </div>
 

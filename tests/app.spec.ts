@@ -115,7 +115,7 @@ test.describe('Drone Navigation Simulator', () => {
     await expect(modal).toBeVisible();
 
     // Version should be displayed
-    await expect(page.locator('text=Version 2.2.0')).toBeVisible();
+    await expect(page.locator('text=Version 2.3.0')).toBeVisible();
   });
 
   test('should open Help modal', async ({ page }) => {

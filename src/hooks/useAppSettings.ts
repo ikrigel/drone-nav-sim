@@ -8,6 +8,8 @@ const DEFAULT_SETTINGS: AppSettings = {
     enabled: false,
     level: 'info',
   },
+  units: 'metric',
+  showCamera: false,
 };
 
 type FontSize = 'small' | 'medium' | 'large' | 'xl' | 'xxl';
