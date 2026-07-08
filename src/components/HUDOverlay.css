@@ -30,6 +30,7 @@
   justify-content: space-around;
   align-items: flex-end;
   padding: 12px;
+  padding-bottom: 90px;
   background: rgba(0, 0, 0, 0.4);
   gap: 12px;
   flex: 0 0 auto;
@@ -99,10 +100,16 @@
 
 /* Large phones */
 @media (max-width: 600px) and (min-width: 481px) {
-  .hud-top,
+  .hud-top {
+    gap: 8px;
+    padding: 8px;
+    padding-top: 55px;
+  }
+
   .hud-bottom {
     gap: 8px;
     padding: 8px;
+    padding-bottom: 85px;
   }
 
   .hud-value {
@@ -128,10 +135,16 @@
 
 /* Medium phones */
 @media (max-width: 480px) and (min-width: 361px) {
-  .hud-top,
+  .hud-top {
+    gap: 6px;
+    padding: 6px;
+    padding-top: 52px;
+  }
+
   .hud-bottom {
     gap: 6px;
     padding: 6px;
+    padding-bottom: 82px;
   }
 
   .hud-value {
@@ -156,10 +169,16 @@
 
 /* Small phones */
 @media (max-width: 360px) {
-  .hud-top,
+  .hud-top {
+    gap: 4px;
+    padding: 4px;
+    padding-top: 48px;
+  }
+
   .hud-bottom {
     gap: 4px;
     padding: 4px;
+    padding-bottom: 78px;
   }
 
   .hud-value {

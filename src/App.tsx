@@ -114,6 +114,7 @@ export function App() {
           opticalFlow={camera.opticalFlow}
           features={camera.features}
           elapsedMs={elapsedMs}
+          units={appSettings.settings.units}
         />
         <CameraFeed
           isVisible={appSettings.settings.showCamera && isFlying}

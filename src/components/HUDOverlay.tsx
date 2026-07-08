@@ -1,4 +1,5 @@
 import type { DroneCoordinates, OpticalFlowVector, CameraFeature } from '../types';
+import { convertValue, getUnitLabel } from '../utils/unitConversion';
 import './HUDOverlay.css';
 
 interface HUDOverlayProps {
@@ -6,6 +7,7 @@ interface HUDOverlayProps {
   opticalFlow: OpticalFlowVector;
   features: CameraFeature[];
   elapsedMs: number;
+  units?: 'metric' | 'imperial';
 }
 
 const COMPASS_LABELS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -29,9 +31,22 @@ export function HUDOverlay({
   opticalFlow,
   features,
   elapsedMs,
+  units = 'metric',
 }: HUDOverlayProps) {
   const speed = Math.sqrt(coordinates.vx ** 2 + coordinates.vy ** 2);
   const distance = Math.sqrt(coordinates.x ** 2 + coordinates.y ** 2);
+
+  // Convert values based on unit system
+  const displayAltitude = convertValue(coordinates.z, 'meters', units);
+  const displayX = convertValue(coordinates.x, 'meters', units);
+  const displayY = convertValue(coordinates.y, 'meters', units);
+  const displayDistance = convertValue(distance, 'meters', units);
+  const displaySpeed = convertValue(speed, 'ms', units);
+  const displayVx = convertValue(coordinates.vx, 'ms', units);
+  const displayVy = convertValue(coordinates.vy, 'ms', units);
+
+  const distanceUnit = getUnitLabel('distance', units);
+  const speedUnit = getUnitLabel('speed', units);
 
   return (
     <div className="hud-overlay">
@@ -45,19 +60,19 @@ export function HUDOverlay({
         </div>
         <div className="hud-stat">
           <div className="hud-label">SPD</div>
-          <div className="hud-value">{speed.toFixed(2)} m/s</div>
+          <div className="hud-value">{displaySpeed.toFixed(2)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">ALT</div>
-          <div className="hud-value">{coordinates.z.toFixed(1)} m</div>
+          <div className="hud-value">{displayAltitude.toFixed(1)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">X</div>
-          <div className="hud-value">{coordinates.x.toFixed(1)} m</div>
+          <div className="hud-value">{displayX.toFixed(1)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">Y</div>
-          <div className="hud-value">{coordinates.y.toFixed(1)} m</div>
+          <div className="hud-value">{displayY.toFixed(1)} {distanceUnit}</div>
         </div>
       </div>
 
@@ -68,7 +83,7 @@ export function HUDOverlay({
         </div>
         <div className="hud-stat">
           <div className="hud-label">DIST</div>
-          <div className="hud-value">{distance.toFixed(1)} m</div>
+          <div className="hud-value">{displayDistance.toFixed(1)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">FLOW</div>
@@ -76,11 +91,11 @@ export function HUDOverlay({
         </div>
         <div className="hud-stat">
           <div className="hud-label">VX</div>
-          <div className="hud-value">{coordinates.vx.toFixed(2)} m/s</div>
+          <div className="hud-value">{displayVx.toFixed(2)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">VY</div>
-          <div className="hud-value">{coordinates.vy.toFixed(2)} m/s</div>
+          <div className="hud-value">{displayVy.toFixed(2)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">FEAT</div>
