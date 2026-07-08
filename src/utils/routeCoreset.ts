@@ -75,8 +75,13 @@ function rdpSimplify(points: RoutePoint[], epsilon: number): number[] {
     const left = rdpSimplify(points.slice(0, maxIndex + 1), epsilon);
     const right = rdpSimplify(points.slice(maxIndex), epsilon);
 
-    // Combine results (avoid duplicating middle point)
-    return [...left.slice(0, -1), ...right.map(idx => (idx === 0 ? maxIndex : idx + maxIndex))];
+    // Combine results, adjusting right indices to original array coordinates
+    // left indices are already 0..maxIndex
+    // right indices need offset: right[i] + maxIndex gives position in original
+    const leftIndices = left.slice(0, -1); // Remove last point (it's the maxIndex point)
+    const rightIndices = right.map(idx => idx + maxIndex); // Offset all indices
+
+    return [...leftIndices, ...rightIndices];
   }
 
   // Keep only start and end points
