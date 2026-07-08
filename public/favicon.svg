@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#1a1a2e" stroke="#00ff00" stroke-width="2"/>
+
+  <!-- Drone body (center square) -->
+  <rect x="40" y="40" width="20" height="20" fill="#00ff00" stroke="#00ff00" stroke-width="1" rx="2"/>
+
+  <!-- Rotors (circles at each corner) -->
+  <circle cx="25" cy="25" r="6" fill="#00ff00" stroke="#00ff00" stroke-width="1"/>
+  <circle cx="75" cy="25" r="6" fill="#00ff00" stroke="#00ff00" stroke-width="1"/>
+  <circle cx="25" cy="75" r="6" fill="#00ff00" stroke="#00ff00" stroke-width="1"/>
+  <circle cx="75" cy="75" r="6" fill="#00ff00" stroke="#00ff00" stroke-width="1"/>
+
+  <!-- Arms connecting body to rotors -->
+  <line x1="45" y1="40" x2="25" y2="25" stroke="#00ff00" stroke-width="2"/>
+  <line x1="55" y1="40" x2="75" y2="25" stroke="#00ff00" stroke-width="2"/>
+  <line x1="45" y1="60" x2="25" y2="75" stroke="#00ff00" stroke-width="2"/>
+  <line x1="55" y1="60" x2="75" y2="75" stroke="#00ff00" stroke-width="2"/>
+
+  <!-- Camera indicator (small dot in center) -->
+  <circle cx="50" cy="50" r="3" fill="#ffff00"/>
+</svg>
