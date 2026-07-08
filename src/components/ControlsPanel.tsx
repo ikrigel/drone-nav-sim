@@ -2,7 +2,8 @@ import './ControlsPanel.css';
 
 interface ControlsPanelProps {
   isFlying: boolean;
-  sensorPermission: 'granted' | 'denied' | 'prompt';
+  orientationPermission: 'granted' | 'denied' | 'prompt';
+  motionPermission: 'granted' | 'denied' | 'prompt';
   onEnableSensors: () => void;
   onStart: () => void;
   onStop: () => void;
@@ -12,26 +13,36 @@ interface ControlsPanelProps {
 
 export function ControlsPanel({
   isFlying,
-  sensorPermission,
+  orientationPermission,
+  motionPermission,
   onEnableSensors,
   onStart,
   onStop,
   onReset,
   onRecalibrate,
 }: ControlsPanelProps) {
+  const sensorsReady =
+    orientationPermission === 'granted' && motionPermission === 'granted';
+  const sensorsPending =
+    orientationPermission === 'prompt' || motionPermission === 'prompt';
+  const sensorsDenied =
+    orientationPermission === 'denied' || motionPermission === 'denied';
+
   return (
     <div className="controls-panel">
-      {sensorPermission === 'prompt' && (
+      {sensorsPending && (
         <button className="btn btn-primary" onClick={onEnableSensors}>
           Enable Sensors
         </button>
       )}
 
-      {sensorPermission === 'denied' && (
-        <div className="warning">Device orientation permission denied</div>
+      {sensorsDenied && (
+        <div className="warning">
+          Sensor permissions denied. Please enable orientation and motion sensors.
+        </div>
       )}
 
-      {sensorPermission === 'granted' && !isFlying && (
+      {sensorsReady && !isFlying && (
         <button className="btn btn-primary" onClick={onStart}>
           Start Flight
         </button>
@@ -48,9 +59,11 @@ export function ControlsPanel({
         </>
       )}
 
-      {!isFlying && <button className="btn btn-secondary" onClick={onReset}>
-        Reset
-      </button>}
+      {!isFlying && sensorsReady && (
+        <button className="btn btn-secondary" onClick={onReset}>
+          Reset
+        </button>
+      )}
     </div>
   );
 }

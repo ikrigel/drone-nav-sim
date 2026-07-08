@@ -4,11 +4,17 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   background: #1a1a2e;
   color: #00ff00;
   font-family: 'Courier New', monospace;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 #root {
@@ -31,10 +37,54 @@ body {
   position: relative;
   overflow: hidden;
   background: #0d0d16;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Font size scaling */
+.app-container.font-small {
+  font-size: 14px;
+}
+
+.app-container.font-medium {
+  font-size: 16px;
+}
+
+.app-container.font-large {
+  font-size: 18px;
+}
+
+/* Responsive design */
+@media (max-width: 1000px) {
+  html {
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 600px) {
+  html {
+    font-size: 14px;
+  }
+
   body {
     font-size: 12px;
+  }
+
+  .app-container {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  html {
+    font-size: 13px;
+  }
+
+  body {
+    font-size: 11px;
+  }
+
+  .app-container {
+    font-size: 13px;
   }
 }

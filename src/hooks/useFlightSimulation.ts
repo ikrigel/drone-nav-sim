@@ -153,7 +153,7 @@ export function useFlightSimulation(props: UseFlightSimulationProps): UseFlightS
 
       // Integrate position
       setPosition(prev => {
-        const newPos = integrateStep(prev, sensorState.heading, speed, climbRate, dtSeconds);
+        const newPos = integrateStep(prev, sensorState.heading!, speed, climbRate, dtSeconds);
 
         // Throttle track points: max 4 per second
         setTrackPoints(prev => {
@@ -168,7 +168,7 @@ export function useFlightSimulation(props: UseFlightSimulationProps): UseFlightS
             x: newPos.x,
             y: newPos.y,
             z: newPos.z,
-            heading: sensorState.heading,
+            heading: sensorState.heading!,
             speed,
           };
 

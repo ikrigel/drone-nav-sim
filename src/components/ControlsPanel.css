@@ -75,5 +75,29 @@
   .btn {
     padding: 8px 12px;
     font-size: 12px;
+    flex: 1 1 calc(50% - 3px);
+    min-width: 0;
+  }
+
+  .warning {
+    font-size: 12px;
+    flex: 1 1 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .controls-panel {
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .btn {
+    padding: 6px 10px;
+    font-size: 10px;
+    flex: 1 1 calc(50% - 2px);
+  }
+
+  .warning {
+    font-size: 10px;
   }
 }

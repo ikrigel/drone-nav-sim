@@ -8,30 +8,36 @@
   font-family: 'Courier New', monospace;
   color: #00ff00;
   text-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
+  display: flex;
+  flex-direction: column;
 }
 
 .hud-top {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
+  align-items: flex-start;
   padding: 12px;
   background: rgba(0, 0, 0, 0.4);
   gap: 16px;
+  flex: 0 0 auto;
 }
 
 .hud-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-around;
+  align-items: flex-end;
   padding: 12px;
   background: rgba(0, 0, 0, 0.4);
   gap: 16px;
+  flex: 0 0 auto;
+  margin-top: auto;
 }
 
 .hud-stat {
   text-align: center;
+  flex: 0 1 auto;
 }
 
 .hud-label {
@@ -40,33 +46,115 @@
   text-transform: uppercase;
   opacity: 0.7;
   margin-bottom: 4px;
+  line-height: 1;
 }
 
 .hud-value {
   font-size: 18px;
   font-weight: bold;
   letter-spacing: 1px;
-  min-width: 80px;
+  min-width: 70px;
+  line-height: 1.2;
 }
 
 .hud-compass {
   display: inline-block;
-  margin-left: 8px;
+  margin-left: 6px;
   font-size: 14px;
   opacity: 0.8;
 }
 
-@media (max-width: 600px) {
+/* Responsive design */
+@media (max-width: 1000px) {
+  .hud-top,
+  .hud-bottom {
+    gap: 12px;
+    padding: 10px;
+  }
+
   .hud-value {
-    font-size: 14px;
+    font-size: 16px;
     min-width: 60px;
   }
 
   .hud-label {
-    font-size: 8px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hud-top,
+  .hud-bottom {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .hud-value {
+    font-size: 13px;
+    min-width: 50px;
+  }
+
+  .hud-label {
+    font-size: 7px;
+    margin-bottom: 2px;
   }
 
   .hud-stat {
-    padding: 0 4px;
+    flex: 0 1 calc(50% - 4px);
   }
+
+  .hud-compass {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .hud-top,
+  .hud-bottom {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .hud-value {
+    font-size: 11px;
+    min-width: 45px;
+  }
+
+  .hud-label {
+    font-size: 6px;
+    margin-bottom: 1px;
+  }
+
+  .hud-stat {
+    flex: 0 1 calc(50% - 3px);
+  }
+}
+
+/* Font size scaling */
+:root {
+  font-size: 16px;
+}
+
+.app-container.font-small {
+  font-size: 14px;
+}
+
+.app-container.font-small .hud-value {
+  font-size: 12px;
+}
+
+.app-container.font-small .hud-label {
+  font-size: 8px;
+}
+
+.app-container.font-large {
+  font-size: 18px;
+}
+
+.app-container.font-large .hud-value {
+  font-size: 20px;
+}
+
+.app-container.font-large .hud-label {
+  font-size: 11px;
 }

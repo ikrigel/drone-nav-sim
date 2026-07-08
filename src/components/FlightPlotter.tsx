@@ -63,9 +63,10 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
     // Draw current position marker (arrow pointing in heading direction)
     drawMarker(ctx, centerX, centerY, heading);
 
-    // Draw altitude indicator
+    // Draw altitude indicator (responsive font size)
+    const altFontSize = Math.max(10, Math.min(14, width / 50));
     ctx.fillStyle = '#aaa';
-    ctx.font = '12px monospace';
+    ctx.font = `${altFontSize}px monospace`;
     ctx.fillText(`ALT: ${position.z.toFixed(1)}m`, 10, height - 10);
   }, [position, trackPoints, heading]);
 
@@ -108,9 +109,12 @@ function drawRangeRings(
   const ringInterval = 50; // meters per ring
   const ringsToShow = Math.ceil(maxRadius / (ringInterval * scale));
 
+  // Responsive font size based on canvas width
+  const fontSize = Math.max(8, Math.min(12, width / 60));
+
   ctx.strokeStyle = '#444';
   ctx.lineWidth = 1;
-  ctx.font = '10px monospace';
+  ctx.font = `${fontSize}px monospace`;
   ctx.fillStyle = '#666';
 
   for (let i = 1; i <= ringsToShow; i++) {
@@ -125,11 +129,12 @@ function drawRangeRings(
   // Center crosshair
   ctx.strokeStyle = '#666';
   ctx.lineWidth = 1;
+  const crossSize = Math.max(8, Math.min(12, width / 40));
   ctx.beginPath();
-  ctx.moveTo(centerX - 10, centerY);
-  ctx.lineTo(centerX + 10, centerY);
-  ctx.moveTo(centerX, centerY - 10);
-  ctx.lineTo(centerX, centerY + 10);
+  ctx.moveTo(centerX - crossSize, centerY);
+  ctx.lineTo(centerX + crossSize, centerY);
+  ctx.moveTo(centerX, centerY - crossSize);
+  ctx.lineTo(centerX, centerY + crossSize);
   ctx.stroke();
 }
 

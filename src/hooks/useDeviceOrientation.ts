@@ -13,7 +13,10 @@ export function useDeviceOrientation() {
     // Check initial permission state on iOS 13+
     if (typeof (DeviceOrientationEvent as any)?.requestPermission === 'function') {
       (DeviceOrientationEvent as any).requestPermission().then((perm: string) => {
-        setState(prev => ({ ...prev, permissionState: perm }));
+        setState(prev => ({
+          ...prev,
+          permissionState: (perm === 'granted' ? 'granted' : 'denied') as 'granted' | 'denied'
+        }));
       });
     } else {
       // Android/non-iOS: assume granted

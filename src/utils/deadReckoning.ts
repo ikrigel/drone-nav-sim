@@ -1,7 +1,6 @@
 import type { FlightState } from '../types';
 
 const DEG_TO_RAD = Math.PI / 180;
-const RAD_TO_DEG = 180 / Math.PI;
 
 /**
  * Normalize angle difference to [-180, 180] range.

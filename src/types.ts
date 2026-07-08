@@ -37,3 +37,27 @@ export interface FlightState {
   y: number; // meters east
   z: number; // meters altitude
 }
+
+export interface DeviceMotionState {
+  accelX: number | null; // m/s² east
+  accelY: number | null; // m/s² north
+  accelZ: number | null; // m/s² up
+  rotationRateAlpha: number | null; // deg/s (yaw)
+  rotationRateBeta: number | null; // deg/s (pitch)
+  rotationRateGamma: number | null; // deg/s (roll)
+}
+
+export interface CameraDistanceState {
+  distance: number | null; // estimated distance to ground/object in meters
+  confidence: number; // 0-1 confidence in the measurement
+}
+
+export interface DebugSettings {
+  enabled: boolean;
+  level: 'trace' | 'debug' | 'info' | 'warn' | 'error';
+}
+
+export interface AppSettings {
+  fontSize: 'small' | 'medium' | 'large';
+  debug: DebugSettings;
+}
