@@ -217,27 +217,34 @@ export function opticalFlowToSpeed(
 
 /**
  * Estimate altitude from vertical feature positions
- * Objects closer to horizon appear at certain vertical position
+ * For indoor phone-based movement, altitude is typically 0.5-2 meters
+ * This is NOT traditional drone altitude, but camera height above ground
  */
 export function estimateAltitudeFromFeatures(
   features: CameraFeature[],
   imageHeight: number,
   _focalLength: number,
-  droneHeightM = 1.5 // typical drone/phone height above ground
+  droneHeightM = 0.5 // typical phone height above ground during movement (not 1.5!)
 ): number {
   if (features.length === 0) return droneHeightM;
 
-  // Features near bottom of image = close to ground = low altitude
-  // Features near middle/top = farther = higher altitude
+  // For phone-based indoor movement:
+  // - Most features are at walking distance (nearby walls, floor, ceiling)
+  // - Altitude should remain relatively constant (~0.5-1.5m based on phone height)
+  // - Don't extrapolate beyond typical indoor ceiling height (~3m)
+
   const avgY = features.reduce((sum, f) => sum + f.y, 0) / features.length;
   const normalizedY = (imageHeight - avgY) / imageHeight; // 0 = top, 1 = bottom
 
-  // Simple heuristic: altitude = height + (normalizedY * some_factor)
-  // Features at bottom (norm=1) = on ground (alt=0)
-  // Features at top (norm=0) = far away (alt=high)
+  // For indoor use: cap maximum altitude to 3 meters (typical ceiling)
+  // Features near horizon (norm=0) don't necessarily mean far away
+  const maxIndoorAltitude = 3; // meters (indoor ceiling)
+  const minAltitude = 0.3; // minimum altitude (phone held low)
 
-  const maxAltitude = 100; // meters
-  const estimatedAltitude = Math.max(0, droneHeightM + normalizedY * (maxAltitude - droneHeightM));
+  const estimatedAltitude = Math.max(
+    minAltitude,
+    Math.min(maxIndoorAltitude, droneHeightM + normalizedY * (maxIndoorAltitude - minAltitude))
+  );
 
   return estimatedAltitude;
 }

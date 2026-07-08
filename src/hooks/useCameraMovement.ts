@@ -188,27 +188,50 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
             );
 
             // Calculate speed from optical flow
-            const speed = opticalFlowToSpeed(
+            let speed = opticalFlowToSpeed(
               flow.magnitude,
               dtSeconds,
               altitude,
               calibration.focalLengthY
             );
 
+            // Sanity check: cap speed to reasonable indoor walking speed (0-3 m/s)
+            // Typical human walking: 1.4 m/s
+            // Running: 3-5 m/s
+            // For indoor phone use: cap at 3 m/s
+            const maxReasonableSpeed = 3.0; // m/s
+            if (speed > maxReasonableSpeed) {
+              log.warn(`Speed unreasonable: ${speed.toFixed(2)} m/s (capped to ${maxReasonableSpeed} m/s), alt=${altitude.toFixed(1)}m, flow=${flow.magnitude.toFixed(1)}px`);
+              speed = maxReasonableSpeed;
+            }
+
             // Update velocity based on flow angle and device heading
             const flowHeading = (flow.angle * 180 / Math.PI + 360) % 360;
             const vx = Math.sin((flowHeading * Math.PI) / 180) * speed;
             const vy = Math.cos((flowHeading * Math.PI) / 180) * speed;
 
+            // Sanity check: limit position change per frame
+            const maxPositionDelta = 0.5; // max 0.5m per frame
+            const positionDelta = Math.sqrt((vx * dtSeconds) ** 2 + (vy * dtSeconds) ** 2);
+
+            let finalVx = vx;
+            let finalVy = vy;
+            if (positionDelta > maxPositionDelta && positionDelta > 0) {
+              const scale = maxPositionDelta / positionDelta;
+              finalVx = vx * scale;
+              finalVy = vy * scale;
+              log.warn(`Position delta too large: ${positionDelta.toFixed(2)}m, scaled by ${scale.toFixed(2)}`);
+            }
+
             // Update position
             coordsRef.current = {
               ...coordsRef.current,
-              x: coordsRef.current.x + vx * dtSeconds,
-              y: coordsRef.current.y + vy * dtSeconds,
+              x: coordsRef.current.x + finalVx * dtSeconds,
+              y: coordsRef.current.y + finalVy * dtSeconds,
               z: Math.max(0, altitude),
               heading: flowHeading,
-              vx,
-              vy,
+              vx: finalVx,
+              vy: finalVy,
               vz: 0,
             };
 
@@ -216,7 +239,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
             log.debug(
               `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
-              `vel=(${vx.toFixed(2)}, ${vy.toFixed(2)}) speed=${speed.toFixed(2)} m/s alt=${altitude.toFixed(1)}m features=${currFeatures.length}`
+              `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s alt=${altitude.toFixed(1)}m features=${currFeatures.length}`
             );
           }
         }
