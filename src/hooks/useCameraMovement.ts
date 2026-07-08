@@ -43,6 +43,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
   const prevFeaturesRef = useRef<CameraFeature[]>([]);
   const prevTimestampRef = useRef<number>(0);
   const kalmanFilterRef = useRef<KalmanFilter2D>(new KalmanFilter2D(0, 0));
+  const startingAltitudeRef = useRef<number>(0); // Reference altitude at flight start
   const coordsRef = useRef<DroneCoordinates>({
     x: 0,
     y: 0,
@@ -233,16 +234,25 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
             // This reduces noise and drift from optical flow
             const smoothed = kalmanFilterRef.current.update(rawX, rawY);
 
+            // Calculate relative altitude (can be positive or negative)
+            // Altitude starts at 0 when flight begins
+            // Can climb stairs/mountains (+1.5m) or lower phone/downhill (-1.5m)
+            const relativeAltitude = altitude - startingAltitudeRef.current;
+
+            // Calculate vertical velocity from altitude change
+            const prevZ = coordsRef.current.z;
+            const vz = (relativeAltitude - prevZ) / dtSeconds;
+
             // Update position with smoothed estimates
             coordsRef.current = {
               ...coordsRef.current,
               x: smoothed.x,
               y: smoothed.y,
-              z: altitude, // Always 0 for ground-level navigation
+              z: relativeAltitude, // Can be positive (up) or negative (down)
               heading: flowHeading,
               vx: finalVx,
               vy: finalVy,
-              vz: 0,
+              vz, // Vertical velocity
             };
 
             setCoordinates({ ...coordsRef.current });
@@ -270,10 +280,11 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       prevFeaturesRef.current = [];
       prevTimestampRef.current = 0;
       kalmanFilterRef.current.reset(0, 0);
+      startingAltitudeRef.current = 0; // Reset altitude reference to 0 at start
       coordsRef.current = { x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 };
       setCoordinates({ x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 });
 
-      log.info('Starting frame processing');
+      log.info('Starting frame processing (altitude relative to starting point)');
       // Start continuous frame processing
       animationFrameRef.current = requestAnimationFrame(processFrame);
     } else if (isNavigating && !calibration) {

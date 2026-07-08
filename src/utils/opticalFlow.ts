@@ -216,24 +216,35 @@ export function opticalFlowToSpeed(
 }
 
 /**
- * Estimate altitude from vertical feature positions
- * For ground-level room exploration, altitude is ALWAYS 0 (we're moving horizontally)
- * The camera is held at typical phone height, but we track 2D movement on the ground plane
+ * Estimate altitude change from vertical feature positions
+ * Can be positive (climbing stairs/mountains) or negative (lowering phone/downhill)
+ * Altitude is relative to starting point, not absolute ground level
+ *
+ * Method: Analyze vertical position of features in camera frame
+ * - Features at top of frame = farther away or higher up
+ * - Features at bottom of frame = closer or lower down
  */
 export function estimateAltitudeFromFeatures(
   features: CameraFeature[],
-  _imageHeight: number,
+  imageHeight: number,
   _focalLength: number,
-  _droneHeightM = 0.5
+  _droneHeightM = 0
 ): number {
   if (features.length === 0) return 0;
 
-  // CRITICAL FIX: For ground-based room navigation, altitude should be 0
-  // We're tracking movement on a horizontal plane, not flying up/down
-  // The camera height doesn't change - it's fixed at phone height
-  // This prevents "height drift" and keeps z=0 always (ground level)
+  // Calculate average vertical position of features in image
+  const avgY = features.reduce((sum, f) => sum + f.y, 0) / features.length;
+  const normalizedY = (imageHeight - avgY) / imageHeight; // 0 = top, 1 = bottom
 
-  return 0; // Always return 0 for ground-level navigation
+  // Map feature position to altitude change
+  // Center (norm=0.5) = no change (0m)
+  // Top (norm=0) = climbing up (+1.5m, stairs/mountain)
+  // Bottom (norm=1) = going down (-1.5m, lowering phone/downhill)
+
+  const maxAltitudeChange = 1.5; // Max ±1.5 meters altitude change
+  const altitudeChange = (normalizedY - 0.5) * 2 * maxAltitudeChange;
+
+  return altitudeChange;
 }
 
 function getGray(data: Uint8ClampedArray, pixelIdx: number): number {
