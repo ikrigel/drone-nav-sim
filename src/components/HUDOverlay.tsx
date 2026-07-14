@@ -1,5 +1,6 @@
 import type { DroneCoordinates, OpticalFlowVector, CameraFeature } from '../types';
 import { convertValue, getUnitLabel } from '../utils/unitConversion';
+import { DISPLAY_PRECISION } from '../utils/precision';
 import './HUDOverlay.css';
 
 interface HUDOverlayProps {
@@ -8,6 +9,7 @@ interface HUDOverlayProps {
   features: CameraFeature[];
   elapsedMs: number;
   units?: 'metric' | 'imperial';
+  coordinateSet?: '3dof' | '4dof' | '6dof';
 }
 
 const COMPASS_LABELS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
@@ -32,6 +34,7 @@ export function HUDOverlay({
   features,
   elapsedMs,
   units = 'metric',
+  coordinateSet = '4dof',
 }: HUDOverlayProps) {
   const speed = Math.sqrt(coordinates.vx ** 2 + coordinates.vy ** 2);
   const distance = Math.sqrt(coordinates.x ** 2 + coordinates.y ** 2);
@@ -51,29 +54,47 @@ export function HUDOverlay({
   return (
     <div className="hud-overlay">
       <div className="hud-top">
-        <div className="hud-stat">
-          <div className="hud-label">HDG</div>
-          <div className="hud-value">
-            {`${coordinates.heading.toFixed(0)}°`}
-            <span className="hud-compass">{getCompassLabel(coordinates.heading)}</span>
+        {coordinateSet !== '3dof' && (
+          <div className="hud-stat">
+            <div className="hud-label">HDG</div>
+            <div className="hud-value">
+              {`${coordinates.heading.toFixed(DISPLAY_PRECISION)}°`}
+              <span className="hud-compass">{getCompassLabel(coordinates.heading)}</span>
+            </div>
           </div>
-        </div>
+        )}
         <div className="hud-stat">
           <div className="hud-label">SPD</div>
-          <div className="hud-value">{displaySpeed.toFixed(2)} {speedUnit}</div>
+          <div className="hud-value">{displaySpeed.toFixed(DISPLAY_PRECISION)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">ALT</div>
-          <div className="hud-value">{displayAltitude.toFixed(1)} {distanceUnit}</div>
+          <div className="hud-value">{displayAltitude.toFixed(DISPLAY_PRECISION)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">X</div>
-          <div className="hud-value">{displayX.toFixed(1)} {distanceUnit}</div>
+          <div className="hud-value">{displayX.toFixed(DISPLAY_PRECISION)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">Y</div>
-          <div className="hud-value">{displayY.toFixed(1)} {distanceUnit}</div>
+          <div className="hud-value">{displayY.toFixed(DISPLAY_PRECISION)} {distanceUnit}</div>
         </div>
+        {coordinateSet === '6dof' && (
+          <>
+            <div className="hud-stat">
+              <div className="hud-label">PITCH</div>
+              <div className="hud-value">{coordinates.pitch.toFixed(DISPLAY_PRECISION)}°</div>
+            </div>
+            <div className="hud-stat">
+              <div className="hud-label">ROLL</div>
+              <div className="hud-value">{coordinates.roll.toFixed(DISPLAY_PRECISION)}°</div>
+            </div>
+            <div className="hud-stat">
+              <div className="hud-label">YAW</div>
+              <div className="hud-value">{coordinates.yaw.toFixed(DISPLAY_PRECISION)}°</div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="hud-bottom">
@@ -83,19 +104,19 @@ export function HUDOverlay({
         </div>
         <div className="hud-stat">
           <div className="hud-label">DIST</div>
-          <div className="hud-value">{displayDistance.toFixed(1)} {distanceUnit}</div>
+          <div className="hud-value">{displayDistance.toFixed(DISPLAY_PRECISION)} {distanceUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">FLOW</div>
-          <div className="hud-value">{opticalFlow.magnitude.toFixed(1)} px</div>
+          <div className="hud-value">{opticalFlow.magnitude.toFixed(DISPLAY_PRECISION)} px</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">VX</div>
-          <div className="hud-value">{displayVx.toFixed(2)} {speedUnit}</div>
+          <div className="hud-value">{displayVx.toFixed(DISPLAY_PRECISION)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">VY</div>
-          <div className="hud-value">{displayVy.toFixed(2)} {speedUnit}</div>
+          <div className="hud-value">{displayVy.toFixed(DISPLAY_PRECISION)} {speedUnit}</div>
         </div>
         <div className="hud-stat">
           <div className="hud-label">FEAT</div>

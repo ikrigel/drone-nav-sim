@@ -79,3 +79,29 @@
     font-size: 7px;
   }
 }
+
+.camera-feed-container.fullscreen {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  border: none;
+  border-radius: 0;
+  z-index: 1500;
+}
+
+.camera-feed-size-toggle {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 101;
+  background: rgba(0, 0, 0, 0.7);
+  color: #00ff00;
+  border: 1px solid #00ff00;
+  border-radius: 3px;
+  font-size: 14px;
+  padding: 2px 6px;
+  cursor: pointer;
+}

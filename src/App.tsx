@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useCameraMovement } from './hooks/useCameraMovement';
 import { useAppSettings } from './hooks/useAppSettings';
+import { useDeviceOrientation } from './hooks/useDeviceOrientation';
+import type { DroneCoordinates } from './types';
 import { FlightPlotter } from './components/FlightPlotter';
 import { HUDOverlay } from './components/HUDOverlay';
 import { ControlsPanel } from './components/ControlsPanel';
@@ -11,16 +13,28 @@ import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFligh
 import { compressionSummary } from './utils/compressionStats';
 import './App.css';
 
-const APP_VERSION = '2.7.0';
+const APP_VERSION = '2.8.0';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
-  const [trackHistory, setTrackHistory] = useState<Array<{ x: number; y: number; z: number }>>([]);
+  const [trackHistory, setTrackHistory] = useState<DroneCoordinates[]>([]);
   const [flightStartTime, setFlightStartTime] = useState<number>(0);
 
   const appSettings = useAppSettings();
   const camera = useCameraMovement({ isNavigating: isFlying });
+  const orientation = useDeviceOrientation();
+
+  const liveCoordinates: DroneCoordinates = {
+    ...camera.coordinates,
+    // For 3DOF: no heading/rotation data
+    // For 4DOF: heading only (from optical flow)
+    // For 6DOF: full orientation (heading, pitch, roll, yaw from compass)
+    heading: appSettings.settings.coordinateSet !== '3dof' ? camera.coordinates.heading : 0,
+    yaw: appSettings.settings.coordinateSet === '6dof' ? (orientation.heading ?? 0) : 0,
+    pitch: appSettings.settings.coordinateSet === '6dof' ? (orientation.pitch ?? 0) : 0,
+    roll: appSettings.settings.coordinateSet === '6dof' ? (orientation.roll ?? 0) : 0,
+  };
 
   // Sync app settings with debug logger
   useEffect(() => {
@@ -42,25 +56,21 @@ export function App() {
 
   // Track position history in real-time
   useEffect(() => {
-    if (isFlying && camera.coordinates) {
+    if (isFlying && liveCoordinates) {
       setTrackHistory(prev => {
         const last = prev[prev.length - 1];
         // Only add if position changed significantly
         if (!last || Math.hypot(
-          camera.coordinates.x - last.x,
-          camera.coordinates.y - last.y,
-          camera.coordinates.z - last.z
+          liveCoordinates.x - last.x,
+          liveCoordinates.y - last.y,
+          liveCoordinates.z - last.z
         ) > 0.01) {
-          return [...prev, {
-            x: camera.coordinates.x,
-            y: camera.coordinates.y,
-            z: camera.coordinates.z
-          }];
+          return [...prev, { ...liveCoordinates, timestamp: Date.now() - flightStartTime }];
         }
         return prev;
       });
     }
-  }, [camera.coordinates, isFlying]);
+  }, [liveCoordinates, isFlying, flightStartTime]);
 
   const handleEnableSensors = async () => {
     try {
@@ -72,11 +82,22 @@ export function App() {
     }
   };
 
+  const handleSetCoordinateSet = async (set: '3dof' | '4dof' | '6dof') => {
+    if (set === '6dof') {
+      await orientation.requestPermission();
+    }
+    appSettings.updateSettings({ coordinateSet: set });
+  };
+
   const handleStart = () => {
     const now = Date.now();
     setFlightStartTime(now);
     setTrackHistory([]);
     setIsFlying(true);
+    // Request device orientation permission if in 6dof mode and not yet granted
+    if (appSettings.settings.coordinateSet === '6dof' && orientation.permissionState !== 'granted') {
+      orientation.requestPermission();
+    }
     debugLogger.log('info', 'Flight started - camera tracking active');
   };
 
@@ -107,11 +128,12 @@ export function App() {
 
     const jsonString = exportFlightCourse(
       `Flight ${new Date().toLocaleString()}`,
-      trackHistory as any,
+      trackHistory,
       duration,
       distance,
       Math.max(...trackHistory.map(p => p.z), 0),
-      true // Enable coreset compression
+      true, // Enable coreset compression
+      appSettings.settings.coordinateSet
     );
 
     // Calculate file sizes for statistics
@@ -126,7 +148,8 @@ export function App() {
       duration,
       distance,
       maxAltitude: Math.max(...trackHistory.map(p => p.z), 0),
-      points: trackHistory as any,
+      points: trackHistory,
+      coordinateSet: appSettings.settings.coordinateSet,
     });
 
     const stats = compressionSummary(
@@ -181,25 +204,31 @@ export function App() {
         onFontSizeChange={appSettings.setFontSize}
         onDebugChange={appSettings.setDebugSettings}
         onSettingsChange={appSettings.updateSettings}
+        onCoordinateSetChange={handleSetCoordinateSet}
         version={APP_VERSION}
       />
 
       <div className="flight-view">
         <FlightPlotter
-          position={camera.coordinates}
+          position={liveCoordinates}
           trackPoints={trackHistory}
-          heading={camera.coordinates.heading}
+          heading={liveCoordinates.heading}
         />
         <HUDOverlay
-          coordinates={camera.coordinates}
+          coordinates={liveCoordinates}
           opticalFlow={camera.opticalFlow}
           features={camera.features}
           elapsedMs={elapsedMs}
           units={appSettings.settings.units}
+          coordinateSet={appSettings.settings.coordinateSet}
         />
         <CameraFeed
           isVisible={appSettings.settings.showCamera && isFlying}
           stream={camera.stream}
+          sizeMode={appSettings.settings.cameraSizeMode}
+          onToggleSize={() => appSettings.updateSettings({
+            cameraSizeMode: appSettings.settings.cameraSizeMode === 'fullscreen' ? 'small' : 'fullscreen'
+          })}
         />
       </div>
 

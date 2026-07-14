@@ -10,6 +10,8 @@ const DEFAULT_SETTINGS: AppSettings = {
   },
   units: 'metric',
   showCamera: false,
+  cameraSizeMode: 'small',
+  coordinateSet: '4dof',
 };
 
 type FontSize = 'small' | 'medium' | 'large' | 'xl' | 'xxl';

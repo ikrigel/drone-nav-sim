@@ -62,6 +62,8 @@ export interface AppSettings {
   debug: DebugSettings;
   units: 'metric' | 'imperial';
   showCamera: boolean;
+  cameraSizeMode: 'small' | 'fullscreen';
+  coordinateSet: '3dof' | '4dof' | '6dof';
 }
 
 export interface CameraCalibration {
@@ -100,9 +102,13 @@ export interface DroneCoordinates {
   x: number; // meters east from start
   y: number; // meters north from start
   z: number; // meters altitude from ground
-  heading: number; // degrees 0-360
+  heading: number; // degrees 0-360 (yaw from optical flow)
+  yaw: number; // degrees 0-360 (yaw from device compass); 0 if unavailable
+  pitch: number; // degrees, nose-up positive; 0 when not captured
+  roll: number; // degrees, right-roll positive; 0 when not captured
   vx: number; // velocity east m/s
   vy: number; // velocity north m/s
   vz: number; // velocity up m/s
+  featureCount?: number; // camera feature count at this sample
   timestamp?: number; // milliseconds since flight start
 }

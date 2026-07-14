@@ -15,7 +15,7 @@ npm run preview      # Preview production build locally
 
 ## Project Overview
 
-**Drone Navigation Simulator v2.7.0** — GPS-free navigation tracking using phone camera optical flow and relative altitude detection. Users move their phone to simulate drone movement; the app calculates position, altitude, and heading from camera features and device sensors.
+**Drone Navigation Simulator v2.8.0** — GPS-free navigation tracking using phone camera optical flow and device orientation sensors. Users move their phone to simulate drone movement; the app calculates position, altitude, and full 6DOF orientation from camera features and device sensors. Supports three coordinate collection modes: 3DOF position-only, 4DOF position+heading, or full 6DOF position+rotation.
 
 **Key Distinction:** This is NOT a flight simulator. The phone IS the drone. Real camera analysis drives position calculation.
 
@@ -76,9 +76,9 @@ heading = optical_flow_angle (0-360°)
 |------|---------|
 | `src/App.tsx` | Main render function (~220 lines), wires all hooks |
 | `src/hooks/useCameraMovement.ts` | Camera capture, optical flow, position integration |
-| `src/utils/opticalFlow.ts` | Sobel edge detection, feature matching, RDP simplification |
+| `src/utils/opticalFlow.ts` | Sobel edge detection, feature matching, altitude estimation |
 | `src/utils/kalmanFilter.ts` | 1D/2D Kalman filter for position smoothing |
-| `src/utils/routeCoreset.ts` | Coreset compression algorithm |
+| `src/utils/routeCoreset.ts` | Coreset compression algorithm; see [Compression Proof](docs/coreset-compression-proof.md) for mathematical guarantee |
 | `src/utils/cameraCalibration.ts` | Focal length estimation from device camera |
 | `src/utils/flightExport.ts` | JSON export/import with compression metadata |
 | `src/components/FlightPlotter.tsx` | Top-down 2D map with range rings |
@@ -136,22 +136,24 @@ npm run test:debug          # Debug mode with inspector
 | v2.4.0 | Live camera display, HUD unit conversion |
 | v2.5.0 | Coreset route compression (5-50x smaller files) |
 | v2.6.0 | Relative altitude (±1.5m range), Kalman filtering |
-| v2.7.0 | Documentation update, enhanced modals |
+| v2.7.0 | 6 decimal precision, ResizeObserver for map, camera fullscreen toggle, coreset algorithm fix with mathematical proof |
+| v2.8.0 | Full 6DOF support (pitch, roll, yaw from device sensors), 3-tier coordinate collection modes (3DOF/4DOF/6DOF) |
 
 ## Known Limitations & Next Steps
 
 **Current Limitations:**
 - ❌ No loop closure detection (can't recognize returning to start)
-- ❌ No IMU sensor fusion (ignores accelerometer/gyroscope)
 - ❌ No room boundary constraints (position can drift outside walls)
 - ❌ Single-camera monocular vision (no stereo depth)
+- ⚠️ Altitude (z-axis) not optimized in compression (2D-only guarantee in coreset)
 
-**Planned (v2.8.0+):**
+**Planned (v2.9.0+):**
 - [ ] Loop closure detection
-- [ ] IMU integration for robustness
 - [ ] User-drawn room boundaries
+- [ ] 3D-aware compression (z-axis importance)
 - [ ] Real-time compression during flight
 - [ ] Particle filter for position refinement
+- [ ] Accelerometer integration for climb rate
 
 ## Code Style
 

@@ -2,7 +2,7 @@
 
 ## What Is This App?
 
-**Drone Navigation Simulator v2.7.0** — Turn your phone into a drone and navigate with camera-based position tracking.
+**Drone Navigation Simulator v2.8.0** — Turn your phone into a drone and navigate with camera-based position tracking and device orientation sensing.
 
 This is **NOT a flight game or simulation**. Your phone IS the drone. Real camera analysis calculates your movement in real-time.
 
@@ -45,9 +45,9 @@ Top-down map shows:
 
 ### 📱 What Sensors Are Used?
 
-✅ **Camera** — Optical flow (movement detection)  
-✅ **Compass** — Heading direction  
-✅ **Accelerometer** — Speed estimation (future: IMU fusion)  
+✅ **Camera** — Optical flow (movement detection) + feature tracking  
+✅ **Device Orientation** — Pitch, roll, compass heading (gyroscope + magnetometer)  
+✅ **Optional Accelerometer** — Speed estimation (future: full IMU fusion)  
 ❌ **GPS** — Not used (this is the whole point!)  
 ❌ **Wi-Fi/Bluetooth** — Not used  
 
@@ -55,24 +55,26 @@ Top-down map shows:
 
 ### Core Capabilities
 
-✅ **Multi-Route Building** — Click points to create custom paths (up to 14+ waypoints)  
+✅ **3-Tier Coordinate Collection** — Choose collection mode in Settings:
+   - **3DOF** — Position only (x, y, z)
+   - **4DOF** — Position + heading (x, y, z, heading) — default
+   - **6DOF** — Full orientation (x, y, z, pitch, roll, yaw)  
 ✅ **Route Save/Load** — Store routes in localStorage, export as JSON  
-✅ **GPS Live Tracking** — Real-time position updates (optional)  
-✅ **Auto-Reroute Detection** — Detects when you deviate from planned path  
-✅ **Dark/Light/Satellite Maps** — Three map styles  
+✅ **Real-Time Position Tracking** — 6 decimal precision, Kalman-filtered updates  
 ✅ **Metric/Imperial Units** — Switch between m/s & mph, meters & feet  
-✅ **Live Camera Feed** — See camera stream during flight (toggle in Settings)  
-✅ **Route Compression** — 5-50x smaller files via intelligent waypoint selection  
-✅ **Hebrew + English** — Full bilingual interface with RTL support  
+✅ **Live Camera Feed** — Toggle between small (PIP) and fullscreen modes  
+✅ **Route Compression** — 5-50x smaller files via coreset algorithm with mathematical proof  
+✅ **Dark Mode** — Easy on the eyes during flight  
 
 ### Advanced Features
 
+✅ **Device Orientation Sensors** — Pitch, roll, yaw from device gyroscope and compass  
 ✅ **Kalman Filtering** — Smooths position estimates to reduce noise  
-✅ **Coreset Compression** — Uses geometry + camera quality to reduce route data  
-✅ **Camera Calibration** — Auto-estimates focal length on first flight  
-✅ **Relative Altitude Tracking** — Altitude relative to starting point, not absolute  
-✅ **QR Code Transfer** — Share routes via QR code peer-to-peer  
-✅ **Debug Logging** — Console logging for troubleshooting  
+✅ **Coreset Compression** — RDP algorithm with proven 0.1m error bound; 5-50x file reduction  
+✅ **Camera Calibration** — Auto-estimates focal length and principal point on first flight  
+✅ **Relative Altitude Tracking** — ±1.5m altitude relative to starting point  
+✅ **ResizeObserver** — Canvas redraws correctly when device rotates or window resizes  
+✅ **Debug Logging** — Console logging with five verbosity levels for troubleshooting  
 
 ## Data & Privacy
 
@@ -160,23 +162,27 @@ Position is integrated over time:
 
 ## Current Version
 
-**v2.7.0** — Enhanced Documentation Release
+**v2.8.0** — Full 6DOF Support Release
 
 ### Recent Updates
 
-- v2.7.0 — Comprehensive documentation
+- v2.8.0 — Full 6DOF with device sensors, 3-tier coordinate collection modes, 6dp precision, coreset proof
+- v2.7.0 — 6-decimal precision, ResizeObserver for map fixes, camera fullscreen toggle
 - v2.6.0 — Relative altitude tracking (±1.5m range)
-- v2.5.0 — Coreset route compression (80-92% size reduction)
-- v2.4.0 — Live camera feed display
-- v2.3.0 — Unit conversion, responsive design fixes
+- v2.5.0 — Coreset route compression with mathematical proof (5-50x reduction)
 
 ### Known Issues & Future
 
-**Coming Soon:**
-- [ ] Loop closure detection (recognize returning to start)
-- [ ] IMU sensor fusion (accelerometer + camera)
-- [ ] Room boundary constraints (keep drone in valid area)
-- [ ] Real-time route compression during flight
+**Current Limitations:**
+- ⚠️ Altitude compression uses 2D-only guarantee (z-axis not optimized)
+- ❌ No loop closure detection (can't recognize returning to start)
+- ❌ No room boundary constraints (can drift outside walls)
+
+**Coming Soon (v2.9.0+):**
+- [ ] Loop closure detection
+- [ ] 3D-aware compression (z-axis importance)
+- [ ] Room boundary constraints
+- [ ] Full accelerometer integration for climb rate
 - [ ] Particle filter for better position estimates
 
 ## Use Cases

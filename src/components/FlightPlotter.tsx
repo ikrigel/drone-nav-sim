@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { DroneCoordinates } from '../types';
+import { DISPLAY_PRECISION } from '../utils/precision';
 
 interface FlightPlotterProps {
   position: DroneCoordinates;
@@ -9,78 +10,104 @@ interface FlightPlotterProps {
 
 export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    drawRef.current = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
 
-    // Get device pixel ratio for crisp rendering
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    ctx.scale(dpr, dpr);
+      // Get device pixel ratio for crisp rendering
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
 
-    const width = rect.width;
-    const height = rect.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
+      const width = rect.width;
+      const height = rect.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
 
-    // Clear canvas
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, width, height);
+      // Clear canvas
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, width, height);
 
-    // Calculate scale (pixels per meter)
-    let scale = 2; // Start with 2 pixels per meter
-    if (trackPoints.length > 1) {
-      const bounds = getBounds(trackPoints);
-      const maxDim = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
-      if (maxDim > 0) {
-        scale = Math.min(5, (Math.min(width, height) * 0.8) / maxDim);
+      // Calculate scale (pixels per meter)
+      let scale = 2; // Start with 2 pixels per meter
+      if (trackPoints.length > 1) {
+        const bounds = getBounds(trackPoints);
+        const maxDim = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
+        if (maxDim > 0) {
+          scale = Math.min(5, (Math.min(width, height) * 0.8) / maxDim);
+        }
       }
-    }
 
-    // Draw range rings
-    drawRangeRings(ctx, centerX, centerY, width, height, scale);
+      // Draw range rings
+      drawRangeRings(ctx, centerX, centerY, width, height, scale);
 
-    // Draw track trail
-    if (trackPoints.length > 0) {
-      ctx.strokeStyle = '#00ff00';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      const first = trackPoints[0];
-      ctx.moveTo(centerX + (first.y - position.y) * scale, centerY + (first.x - position.x) * scale);
-      for (let i = 1; i < trackPoints.length; i++) {
-        const p = trackPoints[i];
-        ctx.lineTo(centerX + (p.y - position.y) * scale, centerY + (p.x - position.x) * scale);
-      }
-      ctx.stroke();
-
-      // Draw waypoints as circles
-      ctx.fillStyle = '#00ff00';
-      for (let i = 0; i < trackPoints.length; i += Math.max(1, Math.floor(trackPoints.length / 20))) {
-        const p = trackPoints[i];
-        const x = centerX + (p.y - position.y) * scale;
-        const y = centerY + (p.x - position.x) * scale;
+      // Draw track trail
+      if (trackPoints.length > 0) {
+        ctx.strokeStyle = '#00ff00';
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI * 2);
-        ctx.fill();
+        const first = trackPoints[0];
+        ctx.moveTo(centerX + (first.y - position.y) * scale, centerY + (first.x - position.x) * scale);
+        for (let i = 1; i < trackPoints.length; i++) {
+          const p = trackPoints[i];
+          ctx.lineTo(centerX + (p.y - position.y) * scale, centerY + (p.x - position.x) * scale);
+        }
+        ctx.stroke();
+
+        // Draw waypoints as circles
+        ctx.fillStyle = '#00ff00';
+        for (let i = 0; i < trackPoints.length; i += Math.max(1, Math.floor(trackPoints.length / 20))) {
+          const p = trackPoints[i];
+          const x = centerX + (p.y - position.y) * scale;
+          const y = centerY + (p.x - position.x) * scale;
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Draw starting point marker (blue dot)
+        if (trackPoints.length > 0) {
+          const start = trackPoints[0];
+          const startX = centerX + (start.y - position.y) * scale;
+          const startY = centerY + (start.x - position.x) * scale;
+          ctx.fillStyle = '#3b82f6';
+          ctx.beginPath();
+          ctx.arc(startX, startY, 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
       }
-    }
 
-    // Draw current position marker (arrow pointing in heading direction)
-    drawMarker(ctx, centerX, centerY, heading);
+      // Draw current position marker (arrow pointing in heading direction)
+      drawMarker(ctx, centerX, centerY, heading);
 
-    // Draw altitude and coordinates
-    const altFontSize = Math.max(10, Math.min(14, width / 50));
-    ctx.fillStyle = '#aaa';
-    ctx.font = `${altFontSize}px monospace`;
-    ctx.fillText(`ALT: ${position.z.toFixed(1)}m`, 10, height - 10);
-    ctx.fillText(`POS: (${position.x.toFixed(1)}, ${position.y.toFixed(1)})m`, 10, height - 25);
+      // Draw altitude and coordinates
+      const altFontSize = Math.max(10, Math.min(14, width / 50));
+      ctx.fillStyle = '#aaa';
+      ctx.font = `${altFontSize}px monospace`;
+      ctx.fillText(`ALT: ${position.z.toFixed(DISPLAY_PRECISION)}m`, 10, height - 10);
+      ctx.fillText(`POS: (${position.x.toFixed(DISPLAY_PRECISION)}, ${position.y.toFixed(DISPLAY_PRECISION)})m`, 10, height - 25);
+    };
+    drawRef.current();
   }, [position, trackPoints, heading]);
+
+  useEffect(() => {
+    const container = canvasRef.current?.parentElement;
+    if (!container) return;
+    const observer = new ResizeObserver(() => drawRef.current());
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <canvas

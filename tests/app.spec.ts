@@ -69,8 +69,8 @@ test.describe('Drone Navigation Simulator', () => {
     const modal = page.locator('.modal-header');
     await expect(modal).toBeVisible({ timeout: 5000 });
 
-    // Font size options (5) + Unit options (2) = 7 option buttons total
-    await expect(page.locator('button.option-btn')).toHaveCount(7);
+    // Font size options (5) + Unit options (2) + Coordinate set options (3) = 10 option buttons total
+    await expect(page.locator('button.option-btn')).toHaveCount(10);
   });
 
   test('should change font size', async ({ page }) => {

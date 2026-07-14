@@ -10,16 +10,9 @@ export function useDeviceOrientation() {
   });
 
   useEffect(() => {
-    // Check initial permission state on iOS 13+
-    if (typeof (DeviceOrientationEvent as any)?.requestPermission === 'function') {
-      (DeviceOrientationEvent as any).requestPermission().then((perm: string) => {
-        setState(prev => ({
-          ...prev,
-          permissionState: (perm === 'granted' ? 'granted' : 'denied') as 'granted' | 'denied'
-        }));
-      });
-    } else {
-      // Android/non-iOS: assume granted
+    // iOS 13+: leave as 'prompt' — requestPermission() must be called from a user gesture
+    // Non-iOS: assume permission is already granted
+    if (typeof (DeviceOrientationEvent as any)?.requestPermission !== 'function') {
       setState(prev => ({ ...prev, permissionState: 'granted' }));
     }
   }, []);

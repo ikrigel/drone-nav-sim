@@ -7,10 +7,11 @@ interface MenuBarProps {
   onFontSizeChange: (size: 'small' | 'medium' | 'large' | 'xl' | 'xxl') => void;
   onDebugChange: (debug: Partial<DebugSettings>) => void;
   onSettingsChange: (settings: Partial<AppSettings>) => void;
+  onCoordinateSetChange: (set: '3dof' | '4dof' | '6dof') => void;
   version: string;
 }
 
-export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsChange, version }: MenuBarProps) {
+export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsChange, onCoordinateSetChange, version }: MenuBarProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -66,6 +67,33 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
             </div>
 
             <div className="setting-group">
+              <label>Coordinate Set</label>
+              <div className="coordinate-set-options">
+                <button
+                  className={`option-btn ${settings.coordinateSet === '3dof' ? 'active' : ''}`}
+                  onClick={() => onCoordinateSetChange('3dof')}
+                  title="Position only (x, y, z)"
+                >
+                  3DOF
+                </button>
+                <button
+                  className={`option-btn ${settings.coordinateSet === '4dof' ? 'active' : ''}`}
+                  onClick={() => onCoordinateSetChange('4dof')}
+                  title="Position + Heading (x, y, z, heading)"
+                >
+                  4DOF
+                </button>
+                <button
+                  className={`option-btn ${settings.coordinateSet === '6dof' ? 'active' : ''}`}
+                  onClick={() => onCoordinateSetChange('6dof')}
+                  title="Full 6DOF (x, y, z, pitch, roll, yaw)"
+                >
+                  6DOF
+                </button>
+              </div>
+            </div>
+
+            <div className="setting-group">
               <label>Camera View</label>
               <div className="debug-options">
                 <label className="checkbox">
@@ -77,6 +105,22 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
                   <span>Show Live Camera Feed</span>
                 </label>
               </div>
+              {settings.showCamera && (
+                <div className="camera-size-options">
+                  <button
+                    className={`option-btn ${settings.cameraSizeMode === 'small' ? 'active' : ''}`}
+                    onClick={() => onSettingsChange({ cameraSizeMode: 'small' })}
+                  >
+                    Small (PIP)
+                  </button>
+                  <button
+                    className={`option-btn ${settings.cameraSizeMode === 'fullscreen' ? 'active' : ''}`}
+                    onClick={() => onSettingsChange({ cameraSizeMode: 'fullscreen' })}
+                  >
+                    Fullscreen
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="setting-group">
@@ -148,20 +192,22 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
 
               <h4>Core Features</h4>
               <ul>
+                <li>✅ <strong>3-Tier Coordinate Collection</strong> — Choose 3DOF, 4DOF, or 6DOF</li>
+                <li>✅ <strong>Full 6DOF Support</strong> — Position + pitch, roll, yaw from device sensors</li>
                 <li>✅ <strong>Optical Flow Navigation</strong> — Camera-based movement detection</li>
                 <li>✅ <strong>Relative Altitude Tracking</strong> — Height from -1.5m to +1.5m</li>
-                <li>✅ <strong>Route Compression</strong> — 5-50x smaller files (coreset algorithm)</li>
+                <li>✅ <strong>Route Compression</strong> — 5-50x smaller with mathematical proof</li>
                 <li>✅ <strong>Route Save/Load</strong> — Persist flights to localStorage</li>
                 <li>✅ <strong>Metric/Imperial Units</strong> — Switch between m/s & mph</li>
-                <li>✅ <strong>Kalman Filtering</strong> — Smooth position estimates</li>
-                <li>✅ <strong>Live Camera Feed</strong> — See camera stream during flight</li>
+                <li>✅ <strong>Live Camera Feed</strong> — Fullscreen or PIP view during flight</li>
               </ul>
 
               <h4>What Sensors Are Used?</h4>
               <ul>
                 <li>✅ <strong>Camera</strong> — Optical flow (movement detection)</li>
-                <li>✅ <strong>Compass</strong> — Heading direction</li>
-                <li>✅ <strong>Accelerometer</strong> — Speed estimation (future: IMU fusion)</li>
+                <li>✅ <strong>Device Orientation</strong> — Pitch, roll, yaw (gyroscope + compass)</li>
+                <li>✅ <strong>Compass</strong> — Absolute heading direction</li>
+                <li>⚠️ <strong>Accelerometer</strong> — Speed estimation (future: full IMU fusion)</li>
                 <li>❌ <strong>GPS</strong> — Not used (this is the whole point!)</li>
                 <li>❌ <strong>Wi-Fi/Bluetooth</strong> — Not used</li>
               </ul>
@@ -176,11 +222,11 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
 
               <h4>Recent Updates</h4>
               <ul>
-                <li>v2.7.0 — Comprehensive documentation update</li>
+                <li>v2.8.0 — Full 6DOF support with device sensors, 3-tier coordinate collection</li>
+                <li>v2.7.0 — 6-decimal precision, ResizeObserver map fixes, camera fullscreen</li>
                 <li>v2.6.0 — Relative altitude tracking (±1.5m range)</li>
-                <li>v2.5.0 — Coreset route compression (80-92% size reduction)</li>
+                <li>v2.5.0 — Coreset route compression with mathematical proof (5-50x)</li>
                 <li>v2.4.0 — Live camera feed display</li>
-                <li>v2.3.0 — Unit conversion, responsive design fixes</li>
               </ul>
 
               <p style={{marginTop: '1em', fontSize: '0.9em', opacity: 0.8}}>

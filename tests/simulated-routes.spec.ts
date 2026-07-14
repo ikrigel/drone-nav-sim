@@ -53,8 +53,8 @@ test.describe('Simulated Flight Routes', () => {
     await startBtn.click();
     await page.waitForTimeout(300);
 
-    // Verify flight plotter canvas is visible
-    const canvas = page.locator('canvas');
+    // Verify flight plotter canvas is visible (first canvas in flight-view is the plotter)
+    const canvas = page.locator('.flight-view canvas');
     await expect(canvas).toBeVisible();
 
     // Canvas should have width and height set

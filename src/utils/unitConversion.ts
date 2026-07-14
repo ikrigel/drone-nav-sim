@@ -1,19 +1,21 @@
+import { DISPLAY_PRECISION } from './precision';
+
 export type UnitSystem = 'metric' | 'imperial';
 
 export function metersToDistance(meters: number, units: UnitSystem): string {
   if (units === 'imperial') {
     const feet = meters * 3.28084;
-    return `${feet.toFixed(1)} ft`;
+    return `${feet.toFixed(DISPLAY_PRECISION)} ft`;
   }
-  return `${meters.toFixed(1)} m`;
+  return `${meters.toFixed(DISPLAY_PRECISION)} m`;
 }
 
 export function speedToDisplay(speedMs: number, units: UnitSystem): string {
   if (units === 'imperial') {
     const mph = speedMs * 2.237; // m/s to mph
-    return `${mph.toFixed(2)} mph`;
+    return `${mph.toFixed(DISPLAY_PRECISION)} mph`;
   }
-  return `${speedMs.toFixed(2)} m/s`;
+  return `${speedMs.toFixed(DISPLAY_PRECISION)} m/s`;
 }
 
 export function convertValue(

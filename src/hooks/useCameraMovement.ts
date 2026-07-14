@@ -21,6 +21,9 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     y: 0,
     z: 0,
     heading: 0,
+    yaw: 0,
+    pitch: 0,
+    roll: 0,
     vx: 0,
     vy: 0,
     vz: 0,
@@ -49,6 +52,9 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     y: 0,
     z: 0,
     heading: 0,
+    yaw: 0,
+    pitch: 0,
+    roll: 0,
     vx: 0,
     vy: 0,
     vz: 0,
@@ -253,6 +259,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
               vx: finalVx,
               vy: finalVy,
               vz, // Vertical velocity
+              featureCount: currFeatures.length,
             };
 
             setCoordinates({ ...coordsRef.current });
@@ -281,8 +288,8 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       prevTimestampRef.current = 0;
       kalmanFilterRef.current.reset(0, 0);
       startingAltitudeRef.current = 0; // Reset altitude reference to 0 at start
-      coordsRef.current = { x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 };
-      setCoordinates({ x: 0, y: 0, z: 0, heading: 0, vx: 0, vy: 0, vz: 0 });
+      coordsRef.current = { x: 0, y: 0, z: 0, heading: 0, yaw: 0, pitch: 0, roll: 0, vx: 0, vy: 0, vz: 0 };
+      setCoordinates({ x: 0, y: 0, z: 0, heading: 0, yaw: 0, pitch: 0, roll: 0, vx: 0, vy: 0, vz: 0 });
 
       log.info('Starting frame processing (altitude relative to starting point)');
       // Start continuous frame processing

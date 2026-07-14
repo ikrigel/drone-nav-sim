@@ -1,5 +1,6 @@
 import { DroneCoordinates } from '../types';
 import { compressRoute, CompressedRoute } from './routeCoreset';
+import { round6 } from './precision';
 
 export interface FlightCourse {
   id: string;
@@ -10,6 +11,7 @@ export interface FlightCourse {
   maxAltitude: number;
   points: DroneCoordinates[];
   compressed?: CompressedRoute; // Optional compressed version
+  coordinateSet?: '3dof' | '4dof' | '6dof'; // Which coordinate set captured this course
 }
 
 export function exportFlightCourse(
@@ -18,7 +20,8 @@ export function exportFlightCourse(
   duration: number,
   distance: number,
   maxAltitude: number,
-  includeCompressed: boolean = true
+  includeCompressed: boolean = true,
+  coordinateSet: '3dof' | '4dof' | '6dof' = '4dof'
 ): string {
   // Convert points to coreset format (add timestamp if missing)
   const coresetPoints = points.map((p, i) => ({
@@ -29,15 +32,43 @@ export function exportFlightCourse(
   // Compress route using coreset algorithm
   const compressed = includeCompressed ? compressRoute(coresetPoints) : undefined;
 
+  // Round numeric fields to 6dp for consistent precision
+  const roundedPoints = points.map(p => ({
+    ...p,
+    x: round6(p.x),
+    y: round6(p.y),
+    z: round6(p.z),
+    heading: round6(p.heading),
+    vx: round6(p.vx),
+    vy: round6(p.vy),
+    vz: round6(p.vz),
+  }));
+
+  const roundedCompressed = compressed && {
+    ...compressed,
+    waypoints: compressed.waypoints.map(w => ({
+      ...w,
+      x: round6(w.x),
+      y: round6(w.y),
+      z: round6(w.z),
+      heading: round6(w.heading),
+    })),
+    metadata: {
+      ...compressed.metadata,
+      totalDistance: round6(compressed.metadata.totalDistance),
+    },
+  };
+
   const course: FlightCourse = {
     id: `flight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     name,
     createdAt: Date.now(),
     duration,
-    distance,
-    maxAltitude,
-    points,
-    compressed,
+    distance: round6(distance),
+    maxAltitude: round6(maxAltitude),
+    points: roundedPoints,
+    compressed: roundedCompressed,
+    coordinateSet,
   };
 
   return JSON.stringify(course, null, 2);

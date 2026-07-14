@@ -1,7 +1,7 @@
 /**
  * Coreset-based route compression
  * Keeps only essential waypoints while preserving route shape and quality
- * Reduces data size by 10-50x without significant quality loss
+ * Reduces data size by 5-50x without significant quality loss
  */
 
 export interface RoutePoint {
@@ -12,6 +12,9 @@ export interface RoutePoint {
   timestamp: number;
   featureCount?: number; // Camera feature quality metric
   speed?: number;
+  pitch?: number; // 6DOF only (nose-up positive)
+  roll?: number; // 6DOF only (right-roll positive)
+  yaw?: number; // 6DOF only (compass heading)
 }
 
 export interface CompressedRoute {
@@ -140,17 +143,14 @@ export function compressRoute(
   const avgFeatures =
     fullRoute.reduce((sum, p) => sum + (p.featureCount || 10), 0) / fullRoute.length;
 
-  const qualityFiltered: number[] = [];
+  // Deterministic top-K selection by quality score (was stochastic Math.random before)
+  const qualityScored = fullRoute
+    .map((p, i) => ({ index: i, quality: (p.featureCount || 10) / avgFeatures }))
+    .filter(entry => entry.quality > 1.2)
+    .sort((a, b) => b.quality - a.quality);
 
-  for (let i = 0; i < fullRoute.length; i++) {
-    const point = fullRoute[i];
-    const quality = (point.featureCount || 10) / avgFeatures;
-
-    // Keep high-quality points more aggressively
-    if (quality > 1.2) {
-      qualityFiltered.push(i);
-    }
-  }
+  const qualityKeepCount = Math.round(qualityScored.length * qualityWeight);
+  const qualityFilteredDeterministic = qualityScored.slice(0, qualityKeepCount).map(e => e.index);
 
   // Step 3: Heading-based filtering
   // Keep points where direction changes significantly
@@ -169,40 +169,27 @@ export function compressRoute(
     }
   }
 
-  // Step 4: Combine all selected indices
-  const selectedIndices = new Set<number>();
-  selectedIndices.add(0);
-  selectedIndices.add(fullRoute.length - 1);
-
-  // Add RDP points
-  rdpIndices.forEach(i => selectedIndices.add(i));
-
-  // Add quality points (with weight)
-  qualityFiltered.forEach(i => {
-    if (Math.random() < qualityWeight) {
-      selectedIndices.add(i);
-    }
-  });
-
-  // Add heading change points
-  headingFiltered.forEach(i => selectedIndices.add(i));
+  // Step 4: Protected skeleton (RDP + heading) — never to be dropped by min-distance
+  const protectedIndices = new Set<number>([0, fullRoute.length - 1]);
+  rdpIndices.forEach(i => protectedIndices.add(i));
+  headingFiltered.forEach(i => protectedIndices.add(i));
 
   // Step 5: Enforce minimum distance between waypoints
-  const sortedIndices = Array.from(selectedIndices).sort((a, b) => a - b);
-  const finalIndices: number[] = [sortedIndices[0]];
+  // Only quality-filter extras can be dropped for proximity; protected points are immune
+  const finalIndices: number[] = Array.from(protectedIndices).sort((a, b) => a - b);
 
-  for (let i = 1; i < sortedIndices.length; i++) {
-    const lastKept = finalIndices[finalIndices.length - 1];
-    const currentIdx = sortedIndices[i];
-
-    if (distance2D(fullRoute[lastKept], fullRoute[currentIdx]) >= minDistance) {
-      finalIndices.push(currentIdx);
+  // Add quality-filter extras if they're far enough from neighbors
+  for (const idx of qualityFilteredDeterministic) {
+    if (protectedIndices.has(idx)) continue; // Skip if already protected
+    const insertPos = finalIndices.filter(i => i < idx).length;
+    const prevKept = finalIndices[insertPos - 1];
+    const nextKept = finalIndices[insertPos];
+    const farFromPrev = prevKept === undefined || distance2D(fullRoute[prevKept], fullRoute[idx]) >= minDistance;
+    const farFromNext = nextKept === undefined || distance2D(fullRoute[idx], fullRoute[nextKept]) >= minDistance;
+    if (farFromPrev && farFromNext) {
+      finalIndices.push(idx);
+      finalIndices.sort((a, b) => a - b);
     }
-  }
-
-  // Ensure end point is included
-  if (finalIndices[finalIndices.length - 1] !== fullRoute.length - 1) {
-    finalIndices.push(fullRoute.length - 1);
   }
 
   const waypoints = finalIndices.map(i => fullRoute[i]);

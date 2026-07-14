@@ -113,6 +113,16 @@ Access via **⚙️ button** (top-right):
 **Camera View**
 - Toggle to see live camera feed (bottom-right corner)
 - Useful for debugging feature detection
+- **Size Mode**: Choose between Small (PIP) or Fullscreen camera view
+- Use the ⤢/⤡ button in the camera feed to toggle between modes
+
+**Coordinate Set** (NEW in v2.8.0)
+- Choose which axes to collect during flight:
+  - **3DOF** — Position only (x, y, z) — minimal sensor use
+  - **4DOF** — Position + heading (x, y, z, heading) — default, balanced
+  - **6DOF** — Full orientation (x, y, z, pitch, roll, yaw) — requires device orientation permission
+- Selection affects what data is exported and displayed on HUD
+- Can be changed anytime in Settings; change takes effect on next flight
 
 **Debug Logging**
 - Enable to see detailed logs in browser console (F12)
