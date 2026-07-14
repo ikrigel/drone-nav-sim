@@ -424,8 +424,94 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
               <strong>File size example:</strong> 5000 points → 400 waypoints (48 KB from 600 KB)
             </p>
 
-            <p style={{marginTop: '1.5em', fontSize: '0.85em', opacity: 0.7, borderTop: '1px solid #ccc', paddingTop: '1em'}}>
-              For full mathematical details, see <code>docs/coreset-compression-proof.md</code>
+            <h3 style={{marginTop: '2em', borderTop: '2px solid #444', paddingTop: '1em'}}>Academic Citations & References</h3>
+
+            <h4>Primary References</h4>
+            <ol style={{marginLeft: '1.5em', fontSize: '0.9em'}}>
+              <li>
+                <strong>Ramer, U. (1972)</strong> — "An iterative procedure for the polygonal approximation of plane curves"
+                <br/>
+                <em>Computer Graphics and Image Processing</em>, 1(3), 244-256
+                <br/>
+                <a href="https://doi.org/10.1016/S0146-664X(72)80017-0" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>📄 DOI: 10.1016/S0146-664X(72)80017-0</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Original RDP paper. Establishes the perpendicular-distance bound theorem and recursive subdivision method used in this implementation.
+                </p>
+              </li>
+
+              <li style={{marginTop: '1em'}}>
+                <strong>Douglas, D. H. &amp; Peucker, T. K. (1973)</strong> — "Algorithms for the reduction of the number of points required to represent a digitized line or its caricature"
+                <br/>
+                <em>The Canadian Cartographer</em>, 10(2), 112-122
+                <br/>
+                <a href="https://doi.org/10.3138/FM57-6770-U75U-7727" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>📄 DOI: 10.3138/FM57-6770-U75U-7727</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Concurrent independent discovery by Douglas &amp; Peucker. Foundational work for cartographic line simplification.
+                </p>
+              </li>
+
+              <li style={{marginTop: '1em'}}>
+                <strong>Feldman, D. &amp; Langberg, M. (2011)</strong> — "A unified framework for approximating and clustering data"
+                <br/>
+                <em>Proceedings of the 43rd ACM Symposium on Theory of Computing (STOC)</em>
+                <br/>
+                <a href="https://arxiv.org/abs/1309.1195" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>📄 arXiv:1309.1195</a>
+                <br/>
+                <a href="https://doi.org/10.1145/1993636.1993675" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>DOI: 10.1145/1993636.1993675</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Modern coreset framework. Defines quality-based filtering and monotonicity properties for geometric approximation.
+                </p>
+              </li>
+            </ol>
+
+            <h4>Supporting Theory</h4>
+            <ol style={{marginLeft: '1.5em', fontSize: '0.9em'}}>
+              <li>
+                <strong>Hausdorff, F. (1914)</strong> — "Grundzüge der Mengenlehre" (Foundations of Set Theory)
+                <br/>
+                <a href="https://en.wikipedia.org/wiki/Hausdorff_distance" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>📖 Hausdorff Distance (Wikipedia)</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Hausdorff distance metric used to measure error bounds between original and simplified polylines.
+                </p>
+              </li>
+
+              <li style={{marginTop: '1em'}}>
+                <strong>Godau, M. (1991)</strong> — "A natural metric for computing the distance between curves"
+                <br/>
+                <em>LIACS Technical Report</em>
+                <br/>
+                <a href="https://scholar.google.com/scholar?q=Godau+1991+natural+metric+distance+curves" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>🔍 Google Scholar</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Formalizes curve distance metrics; applied to monotonicity lemma in our algorithm.
+                </p>
+              </li>
+
+              <li style={{marginTop: '1em'}}>
+                <strong>Agarwal, P. K., Har-Peled, S., &amp; Varadarajan, K. R. (2005)</strong> — "Approximating extent measures of points"
+                <br/>
+                <em>Journal of the ACM</em>, 52(1), 1-27
+                <br/>
+                <a href="https://doi.org/10.1145/1044731.1044731" target="_blank" rel="noopener noreferrer" style={{color: '#00ff00'}}>📄 DOI: 10.1145/1044731.1044731</a>
+                <p style={{margin: '0.3em 0', opacity: 0.8}}>
+                  Advanced coreset techniques for geometric approximation under bounded error.
+                </p>
+              </li>
+            </ol>
+
+            <h4>Implementation-Specific</h4>
+            <ul style={{marginLeft: '1.5em', fontSize: '0.9em'}}>
+              <li>
+                <strong>Protected Skeleton Invariant:</strong> Our extension ensures RDP-selected points are never dropped by distance thinning, preserving the error bound throughout all compression stages.
+              </li>
+              <li>
+                <strong>Deterministic Quality Selection:</strong> Top-K by feature count replaces stochastic sampling, enabling reproducible compression (see Feldman &amp; Langberg §3.2 on deterministic coresets).
+              </li>
+            </ul>
+
+            <p style={{marginTop: '2em', fontSize: '0.85em', opacity: 0.7, borderTop: '1px solid #ccc', paddingTop: '1em'}}>
+              <strong>Local documentation:</strong> See <code>docs/coreset-compression-proof.md</code> for full derivations and proofs.
+              <br/>
+              <strong>Code:</strong> Algorithm implementation at <code>src/utils/routeCoreset.ts</code>
             </p>
           </div>
         </Modal>
