@@ -2,7 +2,7 @@
 
 ## What Is This App?
 
-**Drone Navigation Simulator v2.8.0** — Turn your phone into a drone and navigate with camera-based position tracking and device orientation sensing.
+**Drone Navigation Simulator v2.9.0** — Turn your phone into a drone and navigate with camera-based position tracking and device orientation sensing.
 
 This is **NOT a flight game or simulation**. Your phone IS the drone. Real camera analysis calculates your movement in real-time.
 
@@ -162,10 +162,11 @@ Position is integrated over time:
 
 ## Current Version
 
-**v2.8.0** — Full 6DOF Support Release
+**v2.9.0** — Map Zoom & Proof Verification Release
 
 ### Recent Updates
 
+- v2.9.0 — Dynamic map zoom controls (100px/meter baseline), academic proof citations, verified compression algorithm
 - v2.8.0 — Full 6DOF with device sensors, 3-tier coordinate collection modes, 6dp precision, coreset proof
 - v2.7.0 — 6-decimal precision, ResizeObserver for map fixes, camera fullscreen toggle
 - v2.6.0 — Relative altitude tracking (±1.5m range)
@@ -178,7 +179,7 @@ Position is integrated over time:
 - ❌ No loop closure detection (can't recognize returning to start)
 - ❌ No room boundary constraints (can drift outside walls)
 
-**Coming Soon (v2.9.0+):**
+**Coming Soon (v3.0.0+):**
 - [ ] Loop closure detection
 - [ ] 3D-aware compression (z-axis importance)
 - [ ] Room boundary constraints

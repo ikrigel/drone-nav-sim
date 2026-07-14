@@ -359,6 +359,6 @@ A: More features = better tracking. <10 means poor conditions.
 
 ---
 
-**Version:** v2.7.0  
+**Version:** v2.9.0  
 **Need help?** Check browser console (F12) → enable debug logs  
 **Report bugs:** https://github.com/ikrigel/drone-nav-sim/issues

@@ -15,7 +15,7 @@ npm run preview      # Preview production build locally
 
 ## Project Overview
 
-**Drone Navigation Simulator v2.8.0** — GPS-free navigation tracking using phone camera optical flow and device orientation sensors. Users move their phone to simulate drone movement; the app calculates position, altitude, and full 6DOF orientation from camera features and device sensors. Supports three coordinate collection modes: 3DOF position-only, 4DOF position+heading, or full 6DOF position+rotation.
+**Drone Navigation Simulator v2.9.0** — GPS-free navigation tracking using phone camera optical flow and device orientation sensors. Users move their phone to simulate drone movement; the app calculates position, altitude, and full 6DOF orientation from camera features and device sensors. Supports three coordinate collection modes: 3DOF position-only, 4DOF position+heading, or full 6DOF position+rotation. Includes dynamic map zoom controls with centimeter-level accuracy (100px/meter baseline) and comprehensive academic proof verification.
 
 **Key Distinction:** This is NOT a flight simulator. The phone IS the drone. Real camera analysis drives position calculation.
 
@@ -138,6 +138,7 @@ npm run test:debug          # Debug mode with inspector
 | v2.6.0 | Relative altitude (±1.5m range), Kalman filtering |
 | v2.7.0 | 6 decimal precision, ResizeObserver for map, camera fullscreen toggle, coreset algorithm fix with mathematical proof |
 | v2.8.0 | Full 6DOF support (pitch, roll, yaw from device sensors), 3-tier coordinate collection modes (3DOF/4DOF/6DOF) |
+| v2.9.0 | Dynamic map zoom controls (100px/meter baseline for centimeter accuracy), academic proof citations, verified compression algorithm |
 
 ## Known Limitations & Next Steps
 
@@ -186,5 +187,5 @@ npm run test:debug          # Debug mode with inspector
 
 ---
 
-**Last Updated:** v2.7.0  
+**Last Updated:** v2.9.0  
 **For questions:** Check CLAUDE.md first, then explore `docs/` directory
