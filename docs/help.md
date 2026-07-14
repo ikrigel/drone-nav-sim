@@ -64,6 +64,16 @@ W ← [100m ring] → E
 - Left = West
 - Distance from center = how far from start point
 
+**Map Zoom Controls** (NEW in v2.8.0)
+- **+/- Buttons** — Located in bottom-right corner of map
+  - Press **+** to zoom in (get closer view, down to 1cm per pixel at 5× zoom)
+  - Press **−** to zoom out (get wider view, up to 3m per pixel at 0.33× zoom)
+  - **% Display** — Shows current zoom level (100% = baseline 100px/meter for centimeter accuracy)
+- **Default Scale** — 100 pixels per meter (1 cm = 1 pixel) for high-fidelity navigation
+- **Adaptive Rings** — Range rings automatically adjust spacing based on zoom level
+  - High zoom: 0.5m rings for fine detail
+  - Low zoom: 50m rings for overview
+
 ### 📊 HUD Telemetry (Real-Time Data)
 
 **Top Row (Position & Direction):**
