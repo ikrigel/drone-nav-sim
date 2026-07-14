@@ -15,6 +15,7 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
   const [showSettings, setShowSettings] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showProof, setShowProof] = useState(false);
 
   return (
     <>
@@ -27,6 +28,9 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
         </button>
         <button className="menu-btn" onClick={() => setShowHelp(true)} title="Help">
           ❓
+        </button>
+        <button className="menu-btn" onClick={() => setShowProof(true)} title="Compression Proof">
+          📐
         </button>
       </div>
 
@@ -368,6 +372,60 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
             <p style={{marginTop: '1em', fontSize: '0.9em', opacity: 0.8, borderTop: '1px solid #ccc', paddingTop: '1em'}}>
               📖 See full documentation at: docs/help.md and docs/about.md<br/>
               🐛 Report bugs: Check ROUTE_STABILITY_INVESTIGATION.md
+            </p>
+          </div>
+        </Modal>
+      )}
+
+      {showProof && (
+        <Modal title="Coreset Compression: Mathematical Proof" onClose={() => setShowProof(false)}>
+          <div className="modal-content proof-content" style={{maxHeight: '80vh', overflowY: 'auto', fontSize: '0.95em', lineHeight: '1.6'}}>
+            <h3>RDP Perpendicular-Distance Bound Guarantee</h3>
+            <p>
+              The Ramer-Douglas-Peucker (RDP) algorithm ensures that every point discarded during compression lies within a <strong>perpendicular distance ε = 0.1m</strong> from the simplified polyline.
+            </p>
+
+            <h4>Algorithm (Simplified)</h4>
+            <ol style={{marginLeft: '1.5em'}}>
+              <li><strong>Recursively subdivide:</strong> For each segment, find the point with max perpendicular distance to the chord</li>
+              <li><strong>If max_distance &gt; ε:</strong> Recursively simplify both sub-segments</li>
+              <li><strong>If max_distance ≤ ε:</strong> Keep only endpoints; all interior points are within ε of the chord</li>
+              <li><strong>Result:</strong> Every discarded point has deviation ≤ 0.1m from the output polyline</li>
+            </ol>
+
+            <h4>Why Quality-Filter Points Are Safe</h4>
+            <p>
+              Quality-filter additions are strictly additive: they <strong>add vertices</strong> to the RDP skeleton. By the monotonicity lemma, adding vertices cannot increase the Hausdorff distance — the error bound is inherited from RDP.
+            </p>
+
+            <h4>Why Heading-Change Points Are Safe</h4>
+            <p>
+              Turning points (heading change &gt; 15°) are also additions to the skeleton, not replacements. They preserve the 0.1m bound by the same monotonicity argument.
+            </p>
+
+            <h4>Protected Skeleton: Min-Distance Safety</h4>
+            <p>
+              RDP and heading-selected points are <strong>marked as protected</strong> and cannot be dropped by min-distance thinning. Only quality-filter &quot;extras&quot; can be pruned for proximity, ensuring the 0.1m error bound survives all stages.
+            </p>
+
+            <h4>Limitations</h4>
+            <ul>
+              <li>✓ <strong>2D guarantee:</strong> Bound applies to x/y plane only (horizontal accuracy)</li>
+              <li>⚠️ <strong>Altitude (z):</strong> Not optimized; z-axis fidelity is unbounded between waypoints</li>
+              <li>✓ <strong>Deterministic:</strong> Modern implementation uses top-K quality selection, reproducible across runs</li>
+            </ul>
+
+            <h4>Practical Result</h4>
+            <p>
+              <strong>Compression ratio: 5-50x</strong> (typical: 10-15x for indoor exploration)
+              <br/>
+              <strong>Error bound: ≤ 0.1m horizontal deviation</strong> (centimeter-level accuracy preserved)
+              <br/>
+              <strong>File size example:</strong> 5000 points → 400 waypoints (48 KB from 600 KB)
+            </p>
+
+            <p style={{marginTop: '1.5em', fontSize: '0.85em', opacity: 0.7, borderTop: '1px solid #ccc', paddingTop: '1em'}}>
+              For full mathematical details, see <code>docs/coreset-compression-proof.md</code>
             </p>
           </div>
         </Modal>

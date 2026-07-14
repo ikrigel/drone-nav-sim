@@ -28,6 +28,16 @@ function formatTime(ms: number): string {
   return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
+function formatDegrees(deg: number): string {
+  const absolute = Math.abs(deg);
+  const degrees = Math.floor(absolute);
+  const minutesDecimal = (absolute - degrees) * 60;
+  const minutes = Math.floor(minutesDecimal);
+  const seconds = (minutesDecimal - minutes) * 60;
+  const secondsFormatted = seconds.toFixed(1);
+  return `${degrees}°${minutes}'${secondsFormatted}"`;
+}
+
 export function HUDOverlay({
   coordinates,
   opticalFlow,
@@ -83,15 +93,15 @@ export function HUDOverlay({
           <>
             <div className="hud-stat">
               <div className="hud-label">PITCH</div>
-              <div className="hud-value">{coordinates.pitch.toFixed(DISPLAY_PRECISION)}°</div>
+              <div className="hud-value" title={`${coordinates.pitch.toFixed(DISPLAY_PRECISION)}°`}>{formatDegrees(coordinates.pitch)}</div>
             </div>
             <div className="hud-stat">
               <div className="hud-label">ROLL</div>
-              <div className="hud-value">{coordinates.roll.toFixed(DISPLAY_PRECISION)}°</div>
+              <div className="hud-value" title={`${coordinates.roll.toFixed(DISPLAY_PRECISION)}°`}>{formatDegrees(coordinates.roll)}</div>
             </div>
             <div className="hud-stat">
               <div className="hud-label">YAW</div>
-              <div className="hud-value">{coordinates.yaw.toFixed(DISPLAY_PRECISION)}°</div>
+              <div className="hud-value" title={`${coordinates.yaw.toFixed(DISPLAY_PRECISION)}°`}>{formatDegrees(coordinates.yaw)}</div>
             </div>
           </>
         )}

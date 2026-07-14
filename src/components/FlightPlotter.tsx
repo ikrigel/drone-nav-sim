@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { DroneCoordinates } from '../types';
 import { DISPLAY_PRECISION } from '../utils/precision';
+import './FlightPlotter.css';
 
 interface FlightPlotterProps {
   position: DroneCoordinates;
@@ -11,6 +12,7 @@ interface FlightPlotterProps {
 export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawRef = useRef<() => void>(() => {});
+  const [zoomLevel, setZoomLevel] = useState(1); // 1 = 100 px/m (1cm = 1px), 2 = 200 px/m, etc.
 
   useEffect(() => {
     drawRef.current = () => {
@@ -37,14 +39,10 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
       ctx.fillRect(0, 0, width, height);
 
       // Calculate scale (pixels per meter)
-      let scale = 2; // Start with 2 pixels per meter
-      if (trackPoints.length > 1) {
-        const bounds = getBounds(trackPoints);
-        const maxDim = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
-        if (maxDim > 0) {
-          scale = Math.min(5, (Math.min(width, height) * 0.8) / maxDim);
-        }
-      }
+      // Default: 100 px/m (1 cm = 1 pixel for centimeter-level accuracy)
+      // User can zoom in (1.5x, 2x, 3x) or out (0.5x, 0.33x)
+      const baseScale = 100; // centimeter-level accuracy: 1cm = 1px
+      let scale = baseScale * zoomLevel;
 
       // Draw range rings
       drawRangeRings(ctx, centerX, centerY, width, height, scale);
@@ -99,7 +97,7 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
       ctx.fillText(`POS: (${position.x.toFixed(DISPLAY_PRECISION)}, ${position.y.toFixed(DISPLAY_PRECISION)})m`, 10, height - 25);
     };
     drawRef.current();
-  }, [position, trackPoints, heading]);
+  }, [position, trackPoints, heading, zoomLevel]);
 
   useEffect(() => {
     const container = canvasRef.current?.parentElement;
@@ -110,31 +108,56 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#1a1a2e',
-        display: 'block',
-      }}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <canvas
+        ref={canvasRef}
+        style={{
+          flex: 1,
+          backgroundColor: '#1a1a2e',
+          display: 'block',
+        }}
+      />
+      <div style={{ position: 'absolute', bottom: 12, right: 12, display: 'flex', gap: 6, zIndex: 50 }}>
+        <button
+          onClick={() => setZoomLevel(prev => Math.max(0.33, prev - 0.5))}
+          style={{
+            background: 'rgba(0,255,0,0.2)',
+            border: '1px solid #00ff00',
+            color: '#00ff00',
+            borderRadius: '4px',
+            padding: '4px 8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+          }}
+          title="Zoom out"
+        >
+          −
+        </button>
+        <div style={{ color: '#00ff00', padding: '4px 8px', fontSize: '12px', minWidth: '40px', textAlign: 'center' }}>
+          {(zoomLevel * 100).toFixed(0)}%
+        </div>
+        <button
+          onClick={() => setZoomLevel(prev => Math.min(5, prev + 0.5))}
+          style={{
+            background: 'rgba(0,255,0,0.2)',
+            border: '1px solid #00ff00',
+            color: '#00ff00',
+            borderRadius: '4px',
+            padding: '4px 8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 'bold',
+          }}
+          title="Zoom in"
+        >
+          +
+        </button>
+      </div>
+    </div>
   );
 }
 
-function getBounds(points: Array<{ x: number; y: number; z: number }>) {
-  let minX = Infinity,
-    maxX = -Infinity,
-    minY = Infinity,
-    maxY = -Infinity;
-  for (const p of points) {
-    minX = Math.min(minX, p.x);
-    maxX = Math.max(maxX, p.x);
-    minY = Math.min(minY, p.y);
-    maxY = Math.max(maxY, p.y);
-  }
-  return { minX, maxX, minY, maxY };
-}
 
 function drawRangeRings(
   ctx: CanvasRenderingContext2D,
@@ -145,7 +168,13 @@ function drawRangeRings(
   scale: number
 ) {
   const maxRadius = (Math.min(width, height) / 2) * 0.9;
-  const ringInterval = 50; // meters per ring
+  // Adaptive ring interval: smaller distances at high zoom (100px/m), larger at low zoom
+  // Goal: 3-5 rings visible at any zoom level
+  let ringInterval = 50; // meters per ring
+  if (scale >= 100) ringInterval = 0.5; // centimeter-level: show 0.5m rings (50px each)
+  else if (scale >= 50) ringInterval = 1;
+  else if (scale >= 20) ringInterval = 2;
+  else if (scale >= 10) ringInterval = 5;
   const ringsToShow = Math.ceil(maxRadius / (ringInterval * scale));
 
   // Responsive font size based on canvas width
