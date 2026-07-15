@@ -185,6 +185,11 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
         const flow = calculateOpticalFlow(matches);
         setOpticalFlow(flow);
 
+        // Debug: log raw optical flow when there are good matches
+        if (matches.length > 5) {
+          log.debug(`[OF] Matches: ${matches.length} | flowX: ${flow.x.toFixed(2)}px | flowY: ${flow.y.toFixed(2)}px | mag: ${flow.magnitude.toFixed(2)}px | angle: ${(flow.angle * 180 / Math.PI).toFixed(1)}°`);
+        }
+
         if (prevTimestampRef.current > 0) {
           const dtSeconds = (timestamp - prevTimestampRef.current) / 1000;
 

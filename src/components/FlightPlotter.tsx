@@ -101,6 +101,17 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
       ctx.font = `${altFontSize}px monospace`;
       ctx.fillText(`ALT: ${position.z.toFixed(DISPLAY_PRECISION)}m`, 10, height - 10);
       ctx.fillText(`POS: (${position.x.toFixed(DISPLAY_PRECISION)}, ${position.y.toFixed(DISPLAY_PRECISION)})m`, 10, height - 25);
+
+      // Debug: show track point count and coordinate ranges
+      if (trackPoints.length > 0) {
+        ctx.fillStyle = '#666';
+        ctx.font = `10px monospace`;
+        const xMin = Math.min(...trackPoints.map(p => p.x));
+        const xMax = Math.max(...trackPoints.map(p => p.x));
+        const yMin = Math.min(...trackPoints.map(p => p.y));
+        const yMax = Math.max(...trackPoints.map(p => p.y));
+        ctx.fillText(`Tracks: ${trackPoints.length} | X-range: ${(xMax-xMin).toFixed(2)}m | Y-range: ${(yMax-yMin).toFixed(2)}m`, 10, 20);
+      }
     };
     drawRef.current();
   }, [position, trackPoints, heading, zoomLevel]);
