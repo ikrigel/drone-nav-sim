@@ -171,7 +171,18 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
         <Modal title="About" onClose={() => setShowAbout(false)}>
           <div className="modal-content about-content">
             <h3>Drone Navigation Simulator</h3>
-            <p><strong>Version {version}</strong> — Enhanced Documentation Release</p>
+            <p style={{fontSize: '1.1em', marginBottom: '0.5em'}}>
+              <strong>Version {version}</strong>
+            </p>
+
+            <div style={{background: '#2a2a3e', padding: '1em', borderRadius: '4px', marginBottom: '1em', fontSize: '0.95em'}}>
+              <p style={{margin: '0.3em 0'}}>
+                <strong>Developer:</strong> Igal Krigel
+              </p>
+              <p style={{margin: '0.3em 0'}}>
+                <strong>Academic Advisor:</strong> Professor Dan Feldman
+              </p>
+            </div>
 
             <div className="about-text">
               <h4>What Is This App?</h4>

@@ -1,6 +1,6 @@
 import { DroneCoordinates } from '../types';
 import { compressRoute, CompressedRoute } from './routeCoreset';
-import { round6 } from './precision';
+import { roundDisplay } from './precision';
 
 export interface FlightCourse {
   id: string;
@@ -32,30 +32,31 @@ export function exportFlightCourse(
   // Compress route using coreset algorithm
   const compressed = includeCompressed ? compressRoute(coresetPoints) : undefined;
 
-  // Round numeric fields to 6dp for consistent precision
+  // Round numeric fields to DISPLAY_PRECISION (5dp) for Google Maps style
+  // Maintains ~1.1m accuracy which is appropriate for 1cm local navigation
   const roundedPoints = points.map(p => ({
     ...p,
-    x: round6(p.x),
-    y: round6(p.y),
-    z: round6(p.z),
-    heading: round6(p.heading),
-    vx: round6(p.vx),
-    vy: round6(p.vy),
-    vz: round6(p.vz),
+    x: roundDisplay(p.x),
+    y: roundDisplay(p.y),
+    z: roundDisplay(p.z),
+    heading: roundDisplay(p.heading),
+    vx: roundDisplay(p.vx),
+    vy: roundDisplay(p.vy),
+    vz: roundDisplay(p.vz),
   }));
 
   const roundedCompressed = compressed && {
     ...compressed,
     waypoints: compressed.waypoints.map(w => ({
       ...w,
-      x: round6(w.x),
-      y: round6(w.y),
-      z: round6(w.z),
-      heading: round6(w.heading),
+      x: roundDisplay(w.x),
+      y: roundDisplay(w.y),
+      z: roundDisplay(w.z),
+      heading: roundDisplay(w.heading),
     })),
     metadata: {
       ...compressed.metadata,
-      totalDistance: round6(compressed.metadata.totalDistance),
+      totalDistance: roundDisplay(compressed.metadata.totalDistance),
     },
   };
 
@@ -64,8 +65,8 @@ export function exportFlightCourse(
     name,
     createdAt: Date.now(),
     duration,
-    distance: round6(distance),
-    maxAltitude: round6(maxAltitude),
+    distance: roundDisplay(distance),
+    maxAltitude: roundDisplay(maxAltitude),
     points: roundedPoints,
     compressed: roundedCompressed,
     coordinateSet,
