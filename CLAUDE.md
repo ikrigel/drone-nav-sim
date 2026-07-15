@@ -187,5 +187,13 @@ npm run test:debug          # Debug mode with inspector
 
 ---
 
+## Project Attribution
+
+**Project Author:** Igal Krigel  
+**Academic Supervisor:** Professor Dan Feldman (Ben-Gurion University of the Negev)  
+**Coreset Theory Base:** Feldman & Langberg (2011) - "A unified framework for approximating and clustering data"
+
+**Mathematical Documentation:** See [docs/coreset-compression-proof.md](docs/coreset-compression-proof.md) for rigorous proofs
+
 **Last Updated:** v2.9.0  
 **For questions:** Check CLAUDE.md first, then explore `docs/` directory

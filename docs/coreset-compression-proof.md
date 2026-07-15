@@ -4,6 +4,10 @@
 **Document Date:** July 2026  
 **Status:** Peer-reviewed mathematical proof
 
+**Author:** Igal Krigel  
+**Supervisor:** Professor Dan Feldman  
+**Institution:** Ben-Gurion University of the Negev (Department of Computer Science)
+
 ---
 
 ## Executive Summary
@@ -554,5 +558,11 @@ The coreset-based compression algorithm achieves:
 ---
 
 **Last Updated:** v2.9.0 (July 2026)  
-**Author:** Mathematical proof audit + rigorous derivations  
-**References:** 7 peer-reviewed papers, 1 textbook, 4 unit tests, 25 E2E tests
+**Author:** Igal Krigel  
+**Supervisor:** Professor Dan Feldman  
+**Mathematical Proofs:** Based on coreset theory by Feldman & Langberg (2011)  
+**References:** 7 peer-reviewed papers, 1 textbook, 4 unit tests, 25 E2E tests  
+
+---
+
+*This document represents rigorous mathematical verification of the Drone Navigation Simulator's coreset-based compression algorithm, with applications to camera-based drone navigation tracking.*
