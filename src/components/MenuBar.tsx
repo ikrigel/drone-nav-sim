@@ -226,15 +226,27 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
 
               <h4>Recent Updates</h4>
               <ul>
+                <li>v2.9.0 — Dynamic map zoom controls, academic proof citations, verified compression</li>
                 <li>v2.8.0 — Full 6DOF support with device sensors, 3-tier coordinate collection</li>
                 <li>v2.7.0 — 6-decimal precision, ResizeObserver map fixes, camera fullscreen</li>
                 <li>v2.6.0 — Relative altitude tracking (±1.5m range)</li>
                 <li>v2.5.0 — Coreset route compression with mathematical proof (5-50x)</li>
-                <li>v2.4.0 — Live camera feed display</li>
               </ul>
 
-              <p style={{marginTop: '1em', fontSize: '0.9em', opacity: 0.8}}>
-                📖 See Help (❓) for detailed user guide • 💻 See docs/ directory for technical documentation
+              <h4 style={{marginTop: '1.5em', borderTop: '1px solid #666', paddingTop: '1em'}}>Project Team</h4>
+              <ul style={{listStyle: 'none', padding: '0'}}>
+                <li style={{marginBottom: '0.8em'}}>
+                  <strong>Developer:</strong> Igal Krigel<br/>
+                  <span style={{fontSize: '0.9em', opacity: 0.8}}>GPS-free camera-based navigation system</span>
+                </li>
+                <li>
+                  <strong>Academic Advisor:</strong> Professor Dan Feldman<br/>
+                  <span style={{fontSize: '0.9em', opacity: 0.8}}>Ben-Gurion University of the Negev<br/>Coreset Theory & Geometric Approximation</span>
+                </li>
+              </ul>
+
+              <p style={{marginTop: '1.5em', fontSize: '0.9em', opacity: 0.8}}>
+                📖 See Help (❓) for detailed user guide • 📐 See Proof (📐) for mathematical documentation • 💻 See CLAUDE.md for technical details
               </p>
             </div>
           </div>
