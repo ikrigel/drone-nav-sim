@@ -13,7 +13,7 @@ import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFligh
 import { compressionSummary } from './utils/compressionStats';
 import './App.css';
 
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.9.2';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
