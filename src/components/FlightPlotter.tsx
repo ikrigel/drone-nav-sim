@@ -53,6 +53,12 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         ctx.lineWidth = 2;
         ctx.beginPath();
         const first = trackPoints[0];
+        // Debug: log coordinate spread to diagnose straight-line issue
+        const xSpread = Math.max(...trackPoints.map(p => p.x)) - Math.min(...trackPoints.map(p => p.x));
+        const ySpread = Math.max(...trackPoints.map(p => p.y)) - Math.min(...trackPoints.map(p => p.y));
+        if (trackPoints.length > 10) {
+          console.log(`[MAP] Tracks: ${trackPoints.length} points | X spread: ${xSpread.toFixed(3)}m | Y spread: ${ySpread.toFixed(3)}m | Current pos: (${position.x.toFixed(3)}, ${position.y.toFixed(3)})`);
+        }
         ctx.moveTo(centerX + (first.y - position.y) * scale, centerY + (first.x - position.x) * scale);
         for (let i = 1; i < trackPoints.length; i++) {
           const p = trackPoints[i];

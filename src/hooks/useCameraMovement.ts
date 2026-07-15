@@ -219,6 +219,11 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
             const vx = Math.sin((flowHeading * Math.PI) / 180) * speed;
             const vy = Math.cos((flowHeading * Math.PI) / 180) * speed;
 
+            // Debug: log heading calculation
+            if (speed > 0.01) {
+              log.debug(`[FLOW] angle=${flow.angle.toFixed(3)}rad flowHeading=${flowHeading.toFixed(1)}° flowMag=${flow.magnitude.toFixed(2)}px vx=${vx.toFixed(3)} vy=${vy.toFixed(3)} speed=${speed.toFixed(2)}m/s`);
+            }
+
             // Sanity check: limit position change per frame
             const maxPositionDelta = 0.5; // max 0.5m per frame
             const positionDelta = Math.sqrt((vx * dtSeconds) ** 2 + (vy * dtSeconds) ** 2);
