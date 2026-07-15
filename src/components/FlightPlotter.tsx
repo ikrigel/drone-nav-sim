@@ -104,13 +104,23 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
 
       // Debug: show track point count and coordinate ranges
       if (trackPoints.length > 0) {
-        ctx.fillStyle = '#666';
-        ctx.font = `10px monospace`;
         const xMin = Math.min(...trackPoints.map(p => p.x));
         const xMax = Math.max(...trackPoints.map(p => p.x));
         const yMin = Math.min(...trackPoints.map(p => p.y));
         const yMax = Math.max(...trackPoints.map(p => p.y));
-        ctx.fillText(`Tracks: ${trackPoints.length} | X-range: ${(xMax-xMin).toFixed(2)}m | Y-range: ${(yMax-yMin).toFixed(2)}m`, 10, 20);
+        const xRange = xMax - xMin;
+        const yRange = yMax - yMin;
+
+        ctx.fillStyle = '#666';
+        ctx.font = `10px monospace`;
+        ctx.fillText(`Tracks: ${trackPoints.length} | X-range: ${xRange.toFixed(2)}m | Y-range: ${yRange.toFixed(2)}m`, 10, 20);
+
+        // Warn if movement is only on one axis (indicates heading bug)
+        if ((xRange < 0.01 && yRange > 0.1) || (yRange < 0.01 && xRange > 0.1)) {
+          ctx.fillStyle = '#ff6600';
+          ctx.fillText('⚠ WARNING: Movement on only one axis - check heading calculation!', 10, 35);
+          console.warn(`[MAP] WARNING: Linear motion detected | X: ${xRange.toFixed(3)}m | Y: ${yRange.toFixed(3)}m`);
+        }
       }
     };
     drawRef.current();
