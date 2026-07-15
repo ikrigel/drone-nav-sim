@@ -29,12 +29,18 @@ function formatTime(ms: number): string {
 }
 
 function formatDegrees(deg: number): string {
+  // Google Maps style: d°m's.ssss" format with 6 decimal digit precision
+  // 6 decimal places in degrees = 0.000001° ≈ 0.11m at equator
+  // In DMS format: show seconds with 4 decimal places (equivalent precision)
   const absolute = Math.abs(deg);
   const degrees = Math.floor(absolute);
   const minutesDecimal = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesDecimal);
   const seconds = (minutesDecimal - minutes) * 60;
-  const secondsFormatted = seconds.toFixed(1);
+
+  // Convert 6 decimal places in degrees to seconds precision
+  // 0.000001° * 3600 seconds/degree = 0.0036 seconds precision = 0.004 (4 decimals)
+  const secondsFormatted = seconds.toFixed(4);
   return `${degrees}°${minutes}'${secondsFormatted}"`;
 }
 
