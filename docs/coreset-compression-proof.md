@@ -5,8 +5,7 @@
 **Status:** Peer-reviewed mathematical proof
 
 **Author:** Igal Krigel  
-**Supervisor:** Professor Dan Feldman  
-**Institution:** Ben-Gurion University of the Negev (Department of Computer Science)
+**Supervisor:** Professor Dan Feldman
 
 ---
 

@@ -241,7 +241,7 @@ export function MenuBar({ settings, onFontSizeChange, onDebugChange, onSettingsC
                 </li>
                 <li>
                   <strong>Academic Advisor:</strong> Professor Dan Feldman<br/>
-                  <span style={{fontSize: '0.9em', opacity: 0.8}}>Ben-Gurion University of the Negev<br/>Coreset Theory & Geometric Approximation</span>
+                  <span style={{fontSize: '0.9em', opacity: 0.8}}>Coreset Theory & Geometric Approximation</span>
                 </li>
               </ul>
 
