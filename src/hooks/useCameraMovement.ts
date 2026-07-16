@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { CameraFeature, OpticalFlowVector, DroneCoordinates, CameraCalibration } from '../types';
 import {
   detectFeatures,
+  detectGroundFacing,
   matchFeatures,
   calculateOpticalFlow,
   opticalFlowToSpeed,
@@ -179,14 +180,20 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       const timestamp = performance.now();
 
       // Detect features in current frame
-      const currFeatures = detectFeatures(imageData, 100, 0.05);
+      // Use previous features to detect if camera is ground-facing
+      const isGroundFacing = prevFeaturesRef.current.length > 0 ?
+        detectGroundFacing(prevFeaturesRef.current, canvas.height) : false;
+
+      const currFeatures = detectFeatures(imageData, 100, 0.05, isGroundFacing);
       setFeatures(currFeatures);
 
       // Debug: log feature detection
       if (currFeatures.length === 0) {
         log.warn(`[FEAT] No features detected!`);
       } else if (currFeatures.length < 10) {
-        log.debug(`[FEAT] Low count: ${currFeatures.length}`);
+        log.debug(`[FEAT] Low count: ${currFeatures.length}${isGroundFacing ? ' [GROUND]' : ''}`);
+      } else if (isGroundFacing) {
+        log.debug(`[FEAT] Ground-facing: ${currFeatures.length} features (adaptive threshold)`);
       }
 
       // Calculate optical flow from feature matching

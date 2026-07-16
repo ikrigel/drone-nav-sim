@@ -2,17 +2,42 @@ import { OpticalFlowVector, CameraFeature } from '../types';
 import { log } from './debugLog';
 
 /**
+ * Detect if camera is facing ground (low altitude, dense features)
+ * Ground scenarios have unique optical flow characteristics
+ */
+export function detectGroundFacing(
+  features: CameraFeature[],
+  imageHeight: number
+): boolean {
+  if (features.length < 5) return false;
+
+  // Check if features are concentrated at bottom (camera pointing down)
+  const bottomFeatures = features.filter(f => f.y > imageHeight * 0.6).length;
+  const isBottomHeavy = bottomFeatures > features.length * 0.5;
+
+  // Check feature density (ground has dense, uniform features)
+  if (features.length > 50) return isBottomHeavy;
+
+  return false;
+}
+
+/**
  * Simple feature detection using brightness gradients
  * Detects corners and edges as potential features to track
+ * Adaptive thresholds for ground-facing scenarios
  */
 export function detectFeatures(
   imageData: ImageData,
   maxFeatures = 100,
-  threshold = 0.1
+  threshold = 0.1,
+  isGroundFacing = false
 ): CameraFeature[] {
   const { data, width, height } = imageData;
   const features: CameraFeature[] = [];
   const featureMap = new Uint8Array(width * height);
+
+  // Adaptive threshold: ground scenarios need lower threshold for better tracking
+  const adaptiveThreshold = isGroundFacing ? threshold * 0.7 : threshold;
 
   // Compute Sobel edge detection
   for (let y = 1; y < height - 1; y++) {
@@ -39,7 +64,7 @@ export function detectFeatures(
       const magnitude = Math.sqrt(sobelX * sobelX + sobelY * sobelY) / 1024;
       const normalized = Math.min(1, magnitude);
 
-      if (normalized > threshold) {
+      if (normalized > adaptiveThreshold) {
         featureMap[y * width + x] = Math.floor(normalized * 255);
       }
     }
