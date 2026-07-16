@@ -38,6 +38,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
   const [features, setFeatures] = useState<CameraFeature[]>([]);
   const [calibration, setCalibration] = useState<CameraCalibration | null>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -80,6 +81,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
       log.info('Camera stream obtained');
       streamRef.current = stream;
+      setStream(stream);
 
       if (!videoRef.current) {
         videoRef.current = document.createElement('video');
@@ -139,6 +141,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+      setStream(null);
     }
 
     if (animationFrameRef.current) {
@@ -333,6 +336,6 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     calibration,
     startCamera,
     stopCamera,
-    stream: streamRef.current,
+    stream,
   };
 }
