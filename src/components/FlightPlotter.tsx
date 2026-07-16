@@ -14,6 +14,14 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
   const drawRef = useRef<() => void>(() => {});
   const [zoomLevel, setZoomLevel] = useState(1); // 1 = 100 px/m (1cm = 1px), 2 = 200 px/m, etc.
 
+  // Ensure canvas is redrawn when trackPoints changes (including empty)
+  useEffect(() => {
+    if (trackPoints.length === 0) {
+      // Force immediate redraw when track is cleared (new flight)
+      drawRef.current();
+    }
+  }, [trackPoints.length]);
+
   useEffect(() => {
     drawRef.current = () => {
       const canvas = canvasRef.current;
@@ -34,7 +42,8 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
       const centerX = width / 2;
       const centerY = height / 2;
 
-      // Clear canvas
+      // Clear canvas completely
+      ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = '#1a1a2e';
       ctx.fillRect(0, 0, width, height);
 

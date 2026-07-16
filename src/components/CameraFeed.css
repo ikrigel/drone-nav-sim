@@ -1,6 +1,6 @@
 .camera-feed-container {
   position: fixed;
-  bottom: 80px;
+  top: 12px;
   right: 12px;
   width: 120px;
   height: 90px;
@@ -41,7 +41,7 @@
   .camera-feed-container {
     width: 100px;
     height: 75px;
-    bottom: 70px;
+    top: 10px;
     right: 10px;
   }
 
@@ -55,7 +55,7 @@
   .camera-feed-container {
     width: 90px;
     height: 68px;
-    bottom: 60px;
+    top: 8px;
     right: 8px;
     border-width: 1px;
   }
@@ -71,7 +71,7 @@
   .camera-feed-container {
     width: 80px;
     height: 60px;
-    bottom: 55px;
+    top: 6px;
     right: 6px;
   }
 
