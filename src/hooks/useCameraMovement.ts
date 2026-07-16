@@ -288,9 +288,6 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
             setCoordinates({ ...coordsRef.current });
 
-            // Detailed position tracking for diagnostics
-            const dx = coordsRef.current.x - prevZ; // Track x change from last altitude as proxy
-            const dy = coordsRef.current.y - prevZ; // Track y change
             log.debug(
               `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
               `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s flowAng=${flowHeading.toFixed(0)}° alt=${altitude.toFixed(1)}m feat=${currFeatures.length} match=${matches.length}`
