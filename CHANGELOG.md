@@ -2,6 +2,55 @@
 
 All notable changes to the Drone Navigation Simulator are documented in this file.
 
+## [2.9.3] - 2026-07-16
+
+### Added
+- 🎥 **Floating Camera Feed** - Live camera display automatically enabled when sensors activated, positioned at bottom-right corner
+- 🔍 **Enhanced Diagnostics** - Comprehensive feature detection and matching logging for motion tracking troubleshooting
+- ⚠️ **Motion Axis Detection** - Automatic warnings when movement detected only on single axis (heading lock indicator)
+- 🎯 **Stream State Management** - Proper camera stream lifecycle across flight stop/start cycles
+
+### Fixed
+- 🐛 **Camera Disappearing** - Camera stream now properly managed with React state, appears consistently across flight restarts
+- 🐛 **Map Redraw Issue** - Canvas properly redraws when starting new flights in same session
+- 🐛 **Stream Ref Stale Closure** - Added explicit stream state tracking to prevent stale stream references
+- ✅ **Mobile Camera UX** - Auto-enable camera view, improved stream management for better mobile experience
+
+### Changed
+- Updated App.tsx to auto-enable camera when sensors are enabled (showCamera flag)
+- Enhanced useCameraMovement hook with proper stream state lifecycle
+- Improved diagnostic logging with detailed feature and match reporting
+
+### Technical Details
+- **Modified Files:**
+  - `src/hooks/useCameraMovement.ts` - Added stream state, enhanced diagnostics
+  - `src/App.tsx` - Auto-enable camera on sensor enable
+  - `src/components/FlightPlotter.tsx` - Added motion axis detection
+  - `src/components/CameraFeed.css` - Camera positioning refinements
+
+### Tests
+- ✅ All 25 tests passing
+- ✅ Feature detection diagnostics working
+- ✅ Stream state management tested across flight cycles
+
+---
+
+## [2.9.2] - 2026-07-16
+
+### Added
+- 📍 **Google Maps Style Coordinates** - Reduced decimal precision to 5 places (~1.1m accuracy) matching Google Maps style
+- 👤 **Developer Attribution** - About modal now displays "Developer: Igal Krigel" and "Academic Advisor: Professor Dan Feldman"
+
+### Fixed
+- 🐛 **Coordinate Precision** - Reduced from 6 to 5 decimal places for cleaner display while maintaining centimeter-level accuracy
+- 🐛 **About Modal** - Version properly displayed in modal
+
+### Changed
+- Precision management refactored with DISPLAY_PRECISION constant
+- HUD overlay and export formats updated to use roundDisplay() function
+
+---
+
 ## [2.3.0] - 2026-07-08
 
 ### Added

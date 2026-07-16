@@ -15,7 +15,7 @@ npm run preview      # Preview production build locally
 
 ## Project Overview
 
-**Drone Navigation Simulator v2.9.0** — GPS-free navigation tracking using phone camera optical flow and device orientation sensors. Users move their phone to simulate drone movement; the app calculates position, altitude, and full 6DOF orientation from camera features and device sensors. Supports three coordinate collection modes: 3DOF position-only, 4DOF position+heading, or full 6DOF position+rotation. Includes dynamic map zoom controls with centimeter-level accuracy (100px/meter baseline) and comprehensive academic proof verification.
+**Drone Navigation Simulator v2.9.3** — GPS-free navigation tracking using phone camera optical flow and device orientation sensors. Users move their phone to simulate drone movement; the app calculates position, altitude, and full 6DOF orientation from camera features and device sensors. Supports three coordinate collection modes: 3DOF position-only, 4DOF position+heading, or full 6DOF position+rotation. Includes dynamic map zoom controls with centimeter-level accuracy (100px/meter baseline), floating camera feed for live preview, and comprehensive diagnostic logging for motion tracking.
 
 **Key Distinction:** This is NOT a flight simulator. The phone IS the drone. Real camera analysis drives position calculation.
 
@@ -139,6 +139,8 @@ npm run test:debug          # Debug mode with inspector
 | v2.7.0 | 6 decimal precision, ResizeObserver for map, camera fullscreen toggle, coreset algorithm fix with mathematical proof |
 | v2.8.0 | Full 6DOF support (pitch, roll, yaw from device sensors), 3-tier coordinate collection modes (3DOF/4DOF/6DOF) |
 | v2.9.0 | Dynamic map zoom controls (100px/meter baseline for centimeter accuracy), academic proof citations, verified compression algorithm |
+| v2.9.2 | Google Maps style coordinate precision (5 decimals), About modal with developer/advisor info |
+| v2.9.3 | Floating camera feed, stream state management, comprehensive motion tracking diagnostics, feature detection logging |
 
 ## Known Limitations & Next Steps
 
@@ -195,5 +197,5 @@ npm run test:debug          # Debug mode with inspector
 
 **Mathematical Documentation:** See [docs/coreset-compression-proof.md](docs/coreset-compression-proof.md) for rigorous proofs
 
-**Last Updated:** v2.9.0  
+**Last Updated:** v2.9.3  
 **For questions:** Check CLAUDE.md first, then explore `docs/` directory
