@@ -2,6 +2,31 @@ import { DroneCoordinates } from '../types';
 import { compressRoute, CompressedRoute } from './routeCoreset';
 import { roundDisplay } from './precision';
 
+/**
+ * Convert meters to degrees for Google Maps style display
+ * Assumes x = north, y = east (from starting point)
+ * At equator: 1 meter ≈ 0.000009 degrees latitude/longitude
+ */
+function metersToGoogleMapsStyle(x: number, y: number): { north: number; east: number } {
+  const metersPerDegree = 111111; // At equator
+  return {
+    north: Number((x / metersPerDegree).toFixed(6)),
+    east: Number((y / metersPerDegree).toFixed(6)),
+  };
+}
+
+/**
+ * Custom JSON replacer that limits all numbers to 6 decimal places
+ */
+function jsonReplacer(_key: string, value: unknown): unknown {
+  if (typeof value === 'number' && !Number.isInteger(value)) {
+    // Limit to 6 decimal places by rounding
+    const factor = 1000000;
+    return Math.round(value * factor) / factor;
+  }
+  return value;
+}
+
 export interface FlightCourse {
   id: string;
   name: string;
@@ -32,28 +57,40 @@ export function exportFlightCourse(
   // Compress route using coreset algorithm
   const compressed = includeCompressed ? compressRoute(coresetPoints) : undefined;
 
-  // Round numeric fields to DISPLAY_PRECISION (5dp) for Google Maps style
-  // Maintains ~1.1m accuracy which is appropriate for 1cm local navigation
-  const roundedPoints = points.map(p => ({
-    ...p,
-    x: roundDisplay(p.x),
-    y: roundDisplay(p.y),
-    z: roundDisplay(p.z),
-    heading: roundDisplay(p.heading),
-    vx: roundDisplay(p.vx),
-    vy: roundDisplay(p.vy),
-    vz: roundDisplay(p.vz),
-  }));
+  // Round numeric fields and add Google Maps style coordinates
+  // Maps style uses 6 decimal places for lat/lon (standard Google format)
+  const roundedPoints = points.map(p => {
+    const maps = metersToGoogleMapsStyle(p.x, p.y);
+    return {
+      ...p,
+      x: roundDisplay(p.x),
+      y: roundDisplay(p.y),
+      z: roundDisplay(p.z),
+      heading: roundDisplay(p.heading),
+      vx: roundDisplay(p.vx),
+      vy: roundDisplay(p.vy),
+      vz: roundDisplay(p.vz),
+      // Google Maps style: north/east in degrees (6 decimal places)
+      north: maps.north,
+      east: maps.east,
+    };
+  });
 
   const roundedCompressed = compressed && {
     ...compressed,
-    waypoints: compressed.waypoints.map(w => ({
-      ...w,
-      x: roundDisplay(w.x),
-      y: roundDisplay(w.y),
-      z: roundDisplay(w.z),
-      heading: roundDisplay(w.heading),
-    })),
+    waypoints: compressed.waypoints.map(w => {
+      const maps = metersToGoogleMapsStyle(w.x, w.y);
+      return {
+        ...w,
+        x: roundDisplay(w.x),
+        y: roundDisplay(w.y),
+        z: roundDisplay(w.z),
+        heading: roundDisplay(w.heading),
+        // Google Maps style: north/east in degrees (6 decimal places)
+        north: maps.north,
+        east: maps.east,
+      };
+    }),
     metadata: {
       ...compressed.metadata,
       totalDistance: roundDisplay(compressed.metadata.totalDistance),
@@ -72,7 +109,8 @@ export function exportFlightCourse(
     coordinateSet,
   };
 
-  return JSON.stringify(course, null, 2);
+  // Use custom replacer to limit all numbers to 6 decimal places
+  return JSON.stringify(course, jsonReplacer, 2);
 }
 
 export function importFlightCourse(jsonString: string): FlightCourse | null {
