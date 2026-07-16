@@ -71,10 +71,10 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
             console.warn(`[MAP-WARN] Possible heading lock - only moving on one axis!`);
           }
         }
-        ctx.moveTo(centerX + (first.y - position.y) * scale, centerY + (first.x - position.x) * scale);
+        ctx.moveTo(centerX + (first.y - position.y) * scale, centerY - (first.x - position.x) * scale);
         for (let i = 1; i < trackPoints.length; i++) {
           const p = trackPoints[i];
-          ctx.lineTo(centerX + (p.y - position.y) * scale, centerY + (p.x - position.x) * scale);
+          ctx.lineTo(centerX + (p.y - position.y) * scale, centerY - (p.x - position.x) * scale);
         }
         ctx.stroke();
 
@@ -83,7 +83,7 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         for (let i = 0; i < trackPoints.length; i += Math.max(1, Math.floor(trackPoints.length / 20))) {
           const p = trackPoints[i];
           const x = centerX + (p.y - position.y) * scale;
-          const y = centerY + (p.x - position.x) * scale;
+          const y = centerY - (p.x - position.x) * scale;
           ctx.beginPath();
           ctx.arc(x, y, 3, 0, Math.PI * 2);
           ctx.fill();
@@ -93,7 +93,7 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         if (trackPoints.length > 0) {
           const start = trackPoints[0];
           const startX = centerX + (start.y - position.y) * scale;
-          const startY = centerY + (start.x - position.x) * scale;
+          const startY = centerY - (start.x - position.x) * scale;
           ctx.fillStyle = '#3b82f6';
           ctx.beginPath();
           ctx.arc(startX, startY, 4, 0, Math.PI * 2);
