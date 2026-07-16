@@ -65,8 +65,11 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         // Debug: log coordinate spread to diagnose straight-line issue
         const xSpread = Math.max(...trackPoints.map(p => p.x)) - Math.min(...trackPoints.map(p => p.x));
         const ySpread = Math.max(...trackPoints.map(p => p.y)) - Math.min(...trackPoints.map(p => p.y));
-        if (trackPoints.length > 10) {
-          console.log(`[MAP] Tracks: ${trackPoints.length} points | X spread: ${xSpread.toFixed(3)}m | Y spread: ${ySpread.toFixed(3)}m | Current pos: (${position.x.toFixed(3)}, ${position.y.toFixed(3)})`);
+        if (trackPoints.length > 5) {
+          console.log(`[MAP-DIAG] Points: ${trackPoints.length} | X-range: ${xSpread.toFixed(3)}m | Y-range: ${ySpread.toFixed(3)}m | Current: (${position.x.toFixed(2)}, ${position.y.toFixed(2)})`);
+          if (xSpread < 0.05 || ySpread < 0.05) {
+            console.warn(`[MAP-WARN] Possible heading lock - only moving on one axis!`);
+          }
         }
         ctx.moveTo(centerX + (first.y - position.y) * scale, centerY + (first.x - position.x) * scale);
         for (let i = 1; i < trackPoints.length; i++) {

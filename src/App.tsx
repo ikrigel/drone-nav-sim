@@ -74,9 +74,10 @@ export function App() {
 
   const handleEnableSensors = async () => {
     try {
-      // Just mark camera as ready - it will request permission when flight starts
+      // Mark camera as ready and auto-enable camera view
       setCameraReady(true);
-      debugLogger.log('info', 'Camera access enabled');
+      appSettings.updateSettings({ showCamera: true });
+      debugLogger.log('info', 'Camera access enabled - camera view activated');
     } catch (err) {
       debugLogger.log('error', `Camera setup error: ${err}`);
     }

@@ -321,7 +321,16 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
     };
   }, [isNavigating, calibration, processFrame, stopCamera]);
 
-  // Separate effect to start camera when navigating
+  // Ensure stream state is set when camera is available
+  useEffect(() => {
+    if (isNavigating && streamRef.current) {
+      setStream(streamRef.current);
+    } else if (!isNavigating) {
+      setStream(null);
+    }
+  }, [isNavigating]);
+
+  // Start camera when navigating and calibration not ready
   useEffect(() => {
     if (isNavigating && !calibration) {
       log.info('Navigation started - initializing camera');
