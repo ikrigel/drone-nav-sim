@@ -182,14 +182,25 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
       const currFeatures = detectFeatures(imageData, 100, 0.05);
       setFeatures(currFeatures);
 
+      // Debug: log feature detection
+      if (currFeatures.length === 0) {
+        log.warn(`[FEAT] No features detected!`);
+      } else if (currFeatures.length < 10) {
+        log.debug(`[FEAT] Low count: ${currFeatures.length}`);
+      }
+
       // Calculate optical flow from feature matching
       if (prevFeaturesRef.current.length > 0) {
         const matches = matchFeatures(prevFeaturesRef.current, currFeatures, 100);
         const flow = calculateOpticalFlow(matches);
         setOpticalFlow(flow);
 
-        // Debug: log raw optical flow when there are good matches
-        if (matches.length > 5) {
+        // Debug: log matching and optical flow
+        if (matches.length === 0) {
+          log.warn(`[OF] NO MATCHES! Prev: ${prevFeaturesRef.current.length}, Curr: ${currFeatures.length}`);
+        } else if (matches.length < 5) {
+          log.debug(`[OF] Few matches: ${matches.length}`);
+        } else {
           log.debug(`[OF] Matches: ${matches.length} | flowX: ${flow.x.toFixed(2)}px | flowY: ${flow.y.toFixed(2)}px | mag: ${flow.magnitude.toFixed(2)}px | angle: ${(flow.angle * 180 / Math.PI).toFixed(1)}°`);
         }
 
