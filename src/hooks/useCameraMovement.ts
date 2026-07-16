@@ -288,10 +288,19 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
             setCoordinates({ ...coordsRef.current });
 
+            // Detailed position tracking for diagnostics
+            const dx = coordsRef.current.x - prevZ; // Track x change from last altitude as proxy
+            const dy = coordsRef.current.y - prevZ; // Track y change
             log.debug(
               `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
-              `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s alt=${altitude.toFixed(1)}m features=${currFeatures.length}`
+              `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s flowAng=${flowHeading.toFixed(0)}° alt=${altitude.toFixed(1)}m feat=${currFeatures.length} match=${matches.length}`
             );
+
+            // Warn if heading is stuck at specific angles
+            const roundedHeading = Math.round(flowHeading / 45) * 45;
+            if (speed > 0.1 && Math.abs(flowHeading - roundedHeading) < 2) {
+              log.warn(`[ANGLE-LOCK] Heading stuck at ${roundedHeading}° - optical flow may be constrained!`);
+            }
           }
         }
       }
@@ -334,12 +343,20 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
   // Ensure stream state is set when camera is available
   useEffect(() => {
-    if (isNavigating && streamRef.current) {
-      setStream(streamRef.current);
-    } else if (!isNavigating) {
+    if (isNavigating) {
+      if (streamRef.current) {
+        // Stream exists, sync to state
+        setStream(streamRef.current);
+      } else if (calibration) {
+        // Stream is missing but calibration exists - restart camera
+        log.info('Stream missing - restarting camera');
+        startCamera();
+      }
+    } else {
+      // Not navigating - clear stream
       setStream(null);
     }
-  }, [isNavigating]);
+  }, [isNavigating, calibration, startCamera]);
 
   // Start camera when navigating and calibration not ready
   useEffect(() => {
