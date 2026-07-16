@@ -29,15 +29,15 @@ export function detectGroundFacing(
 export function detectFeatures(
   imageData: ImageData,
   maxFeatures = 100,
-  threshold = 0.1,
+  threshold = 0.08,
   isGroundFacing = false
 ): CameraFeature[] {
   const { data, width, height } = imageData;
   const features: CameraFeature[] = [];
   const featureMap = new Uint8Array(width * height);
 
-  // Adaptive threshold: ground scenarios need lower threshold for better tracking
-  const adaptiveThreshold = isGroundFacing ? threshold * 0.7 : threshold;
+  // Adaptive threshold: ground scenarios need even lower threshold for better tracking
+  const adaptiveThreshold = isGroundFacing ? threshold * 0.6 : threshold;
 
   // Compute Sobel edge detection
   for (let y = 1; y < height - 1; y++) {

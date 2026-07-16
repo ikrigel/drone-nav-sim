@@ -198,7 +198,8 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
       // Calculate optical flow from feature matching
       if (prevFeaturesRef.current.length > 0) {
-        const matches = matchFeatures(prevFeaturesRef.current, currFeatures, 100);
+        // Reduced max distance (100 → 80px) for better sensitivity to small movements
+        const matches = matchFeatures(prevFeaturesRef.current, currFeatures, 80);
         const flow = calculateOpticalFlow(matches);
         setOpticalFlow(flow);
 
@@ -230,11 +231,11 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
               calibration.focalLengthY
             );
 
-            // Sanity check: cap speed to reasonable indoor walking speed (0-3 m/s)
+            // Sanity check: cap speed to reasonable indoor walking speed (0-4 m/s)
             // Typical human walking: 1.4 m/s
             // Running: 3-5 m/s
-            // For indoor phone use: cap at 3 m/s
-            const maxReasonableSpeed = 3.0; // m/s
+            // For indoor phone use and sensitivity: cap at 4 m/s
+            const maxReasonableSpeed = 4.0; // m/s
             if (speed > maxReasonableSpeed) {
               log.warn(`Speed unreasonable: ${speed.toFixed(2)} m/s (capped to ${maxReasonableSpeed} m/s), alt=${altitude.toFixed(1)}m, flow=${flow.magnitude.toFixed(1)}px`);
               speed = maxReasonableSpeed;

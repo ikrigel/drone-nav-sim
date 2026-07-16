@@ -13,7 +13,7 @@ import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFligh
 import { compressionSummary } from './utils/compressionStats';
 import './App.css';
 
-const APP_VERSION = '2.9.7';
+const APP_VERSION = '2.9.8';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
@@ -27,10 +27,9 @@ export function App() {
 
   const liveCoordinates: DroneCoordinates = {
     ...camera.coordinates,
-    // For 3DOF: no heading/rotation data
-    // For 4DOF: heading only (from optical flow)
-    // For 6DOF: full orientation (heading, pitch, roll, yaw from compass)
-    heading: appSettings.settings.coordinateSet !== '3dof' ? camera.coordinates.heading : 0,
+    // Use device orientation heading (compass) instead of optical flow
+    // This provides accurate directional reference from device sensors
+    heading: orientation.heading ?? camera.coordinates.heading ?? 0,
     yaw: appSettings.settings.coordinateSet === '6dof' ? (orientation.heading ?? 0) : 0,
     pitch: appSettings.settings.coordinateSet === '6dof' ? (orientation.pitch ?? 0) : 0,
     roll: appSettings.settings.coordinateSet === '6dof' ? (orientation.roll ?? 0) : 0,
@@ -59,12 +58,12 @@ export function App() {
     if (isFlying && liveCoordinates) {
       setTrackHistory(prev => {
         const last = prev[prev.length - 1];
-        // Only add if position changed significantly
+        // Only add if position changed significantly (reduced threshold for better sensitivity)
         if (!last || Math.hypot(
           liveCoordinates.x - last.x,
           liveCoordinates.y - last.y,
           liveCoordinates.z - last.z
-        ) > 0.01) {
+        ) > 0.005) {
           return [...prev, { ...liveCoordinates, timestamp: Date.now() - flightStartTime }];
         }
         return prev;

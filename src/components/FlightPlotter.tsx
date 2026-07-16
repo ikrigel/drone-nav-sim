@@ -59,7 +59,9 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
       // Draw track trail
       if (trackPoints.length > 0) {
         ctx.strokeStyle = '#00ff00';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         ctx.beginPath();
         const first = trackPoints[0];
         // Debug: log coordinate spread to diagnose straight-line issue
@@ -78,28 +80,37 @@ export function FlightPlotter({ position, trackPoints, heading }: FlightPlotterP
         }
         ctx.stroke();
 
-        // Draw waypoints as circles
+        // Draw waypoints as circles (larger for better visibility)
         ctx.fillStyle = '#00ff00';
+        ctx.strokeStyle = '#00dd00';
+        ctx.lineWidth = 1;
         for (let i = 0; i < trackPoints.length; i += Math.max(1, Math.floor(trackPoints.length / 20))) {
           const p = trackPoints[i];
           const x = centerX + (p.y - position.y) * scale;
           const y = centerY - (p.x - position.x) * scale;
           ctx.beginPath();
-          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
           ctx.fill();
+          ctx.stroke();
         }
 
-        // Draw starting point marker (blue dot)
+        // Draw starting point marker (blue dot with ring)
         if (trackPoints.length > 0) {
           const start = trackPoints[0];
           const startX = centerX + (start.y - position.y) * scale;
           const startY = centerY - (start.x - position.x) * scale;
           ctx.fillStyle = '#3b82f6';
           ctx.beginPath();
-          ctx.arc(startX, startY, 4, 0, Math.PI * 2);
+          ctx.arc(startX, startY, 5, 0, Math.PI * 2);
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // Draw outer ring around start point
+          ctx.strokeStyle = '#3b82f6';
           ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(startX, startY, 10, 0, Math.PI * 2);
           ctx.stroke();
         }
       }
@@ -219,10 +230,10 @@ function drawRangeRings(
   // Responsive font size based on canvas width
   const fontSize = Math.max(8, Math.min(12, width / 60));
 
-  ctx.strokeStyle = '#444';
+  ctx.strokeStyle = '#555';
   ctx.lineWidth = 1;
   ctx.font = `${fontSize}px monospace`;
-  ctx.fillStyle = '#666';
+  ctx.fillStyle = '#888';
 
   for (let i = 1; i <= ringsToShow; i++) {
     const radius = ringInterval * i * scale;
@@ -233,10 +244,23 @@ function drawRangeRings(
     ctx.fillText(`${ringInterval * i}m`, centerX + radius + 2, centerY - 2);
   }
 
-  // Center crosshair
-  ctx.strokeStyle = '#666';
-  ctx.lineWidth = 1;
-  const crossSize = Math.max(8, Math.min(12, width / 40));
+  // Cardinal direction indicators (N, E, S, W)
+  const cardinalDistance = Math.min(maxRadius * 0.85, Math.max(50, width / 8));
+  ctx.fillStyle = '#666';
+  ctx.font = `bold ${fontSize + 2}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('N', centerX, centerY - cardinalDistance);
+  ctx.fillText('S', centerX, centerY + cardinalDistance);
+  ctx.textAlign = 'right';
+  ctx.fillText('W', centerX - cardinalDistance, centerY);
+  ctx.textAlign = 'left';
+  ctx.fillText('E', centerX + cardinalDistance, centerY);
+
+  // Center crosshair - brighter for visibility
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2;
+  const crossSize = Math.max(10, Math.min(15, width / 40));
   ctx.beginPath();
   ctx.moveTo(centerX - crossSize, centerY);
   ctx.lineTo(centerX + crossSize, centerY);
@@ -246,16 +270,16 @@ function drawRangeRings(
 }
 
 function drawMarker(ctx: CanvasRenderingContext2D, x: number, y: number, heading: number | null) {
-  const size = 12;
+  const size = 16;
 
   if (heading !== null) {
-    // Rotate arrow based on heading
+    // Rotate arrow based on heading (device orientation)
     const headingRad = (heading * Math.PI) / 180;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(headingRad);
 
-    // Arrow body (pointing up)
+    // Arrow body (pointing up) - larger and more visible
     ctx.fillStyle = '#ff0000';
     ctx.beginPath();
     ctx.moveTo(0, -size);
@@ -265,20 +289,36 @@ function drawMarker(ctx: CanvasRenderingContext2D, x: number, y: number, heading
     ctx.closePath();
     ctx.fill();
 
-    // Arrow outline
+    // Arrow outline - thicker for visibility
     ctx.strokeStyle = '#ffff00';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.stroke();
+
+    // Inner circle for reference
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(0, 0, 3, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   } else {
-    // No heading: draw a circle
+    // No heading: draw a circle with crosshair
     ctx.fillStyle = '#ff0000';
     ctx.beginPath();
     ctx.arc(x, y, size / 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Crosshair for reference
+    ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y);
+    ctx.lineTo(x + 6, y);
+    ctx.moveTo(x, y - 6);
+    ctx.lineTo(x, y + 6);
     ctx.stroke();
   }
 }
