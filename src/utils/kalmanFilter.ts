@@ -11,7 +11,7 @@ export class KalmanFilter1D {
   constructor(
     initialEstimate: number = 0,
     initialEstimateError: number = 1,
-    measurementError: number = 0.5
+    measurementError: number = 0.2
   ) {
     this.estimate = initialEstimate;
     this.estimate_error = initialEstimateError;
@@ -25,7 +25,7 @@ export class KalmanFilter1D {
    */
   update(measurement: number): number {
     // Predict: assume position might drift, increase uncertainty
-    this.estimate_error += 0.01; // Process noise (small drift)
+    this.estimate_error += 0.005; // Process noise (minimal drift for better responsiveness)
 
     // Update: correct based on measurement
     this.kalman_gain =
@@ -72,8 +72,8 @@ export class KalmanFilter2D {
   private filterY: KalmanFilter1D;
 
   constructor(initialX: number = 0, initialY: number = 0) {
-    this.filterX = new KalmanFilter1D(initialX, 1, 0.5);
-    this.filterY = new KalmanFilter1D(initialY, 1, 0.5);
+    this.filterX = new KalmanFilter1D(initialX, 1, 0.2);
+    this.filterY = new KalmanFilter1D(initialY, 1, 0.2);
   }
 
   /**

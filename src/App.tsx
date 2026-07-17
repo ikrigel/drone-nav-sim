@@ -13,7 +13,7 @@ import { exportFlightCourse, downloadFlightCourse, importFlightCourse, saveFligh
 import { compressionSummary } from './utils/compressionStats';
 import './App.css';
 
-const APP_VERSION = '2.9.8';
+const APP_VERSION = '2.9.9';
 
 export function App() {
   const [isFlying, setIsFlying] = useState(false);
@@ -22,8 +22,9 @@ export function App() {
   const [flightStartTime, setFlightStartTime] = useState<number>(0);
 
   const appSettings = useAppSettings();
-  const camera = useCameraMovement({ isNavigating: isFlying });
   const orientation = useDeviceOrientation();
+  // Pass device heading to camera movement hook for accurate world-frame velocity calculation
+  const camera = useCameraMovement({ isNavigating: isFlying, deviceHeading: orientation.heading });
 
   const liveCoordinates: DroneCoordinates = {
     ...camera.coordinates,

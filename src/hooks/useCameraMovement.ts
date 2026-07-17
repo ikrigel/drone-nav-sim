@@ -14,9 +14,10 @@ import { log } from '../utils/debugLog';
 
 interface UseCameraMovementProps {
   isNavigating: boolean;
+  deviceHeading?: number | null; // Device compass heading (0-360°)
 }
 
-export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
+export function useCameraMovement({ isNavigating, deviceHeading }: UseCameraMovementProps) {
   const [coordinates, setCoordinates] = useState<DroneCoordinates>({
     x: 0,
     y: 0,
@@ -241,14 +242,23 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
               speed = maxReasonableSpeed;
             }
 
-            // Update velocity based on flow angle and device heading
-            const flowHeading = (flow.angle * 180 / Math.PI + 360) % 360;
-            const vx = Math.sin((flowHeading * Math.PI) / 180) * speed;
-            const vy = Math.cos((flowHeading * Math.PI) / 180) * speed;
+            // Calculate optical flow heading in camera frame (0° = right, 90° = down)
+            const flowAngleDegrees = (flow.angle * 180 / Math.PI + 360) % 360;
+
+            // Rotate optical flow to world frame using device heading (compass)
+            // If device heading available: rotate camera frame to compass frame
+            // Camera: 0°=right, 90°=down → World: 0°=north, 90°=east
+            // Formula: worldHeading = cameraHeading + compassHeading - 90
+            const compassHeading = deviceHeading ?? 0; // Default to 0° if unavailable
+            const worldHeading = (flowAngleDegrees + compassHeading - 90 + 360) % 360;
+
+            // Calculate velocity in world frame (north/east)
+            const vx = Math.sin((worldHeading * Math.PI) / 180) * speed;
+            const vy = Math.cos((worldHeading * Math.PI) / 180) * speed;
 
             // Debug: log heading calculation
             if (speed > 0.01) {
-              log.debug(`[FLOW] angle=${flow.angle.toFixed(3)}rad flowHeading=${flowHeading.toFixed(1)}° flowMag=${flow.magnitude.toFixed(2)}px vx=${vx.toFixed(3)} vy=${vy.toFixed(3)} speed=${speed.toFixed(2)}m/s`);
+              log.debug(`[FLOW] flowAngle=${flowAngleDegrees.toFixed(1)}° compass=${compassHeading.toFixed(1)}° → worldHeading=${worldHeading.toFixed(1)}° | flowMag=${flow.magnitude.toFixed(2)}px vx=${vx.toFixed(3)} vy=${vy.toFixed(3)} speed=${speed.toFixed(2)}m/s`);
             }
 
             // Sanity check: limit position change per frame
@@ -287,7 +297,7 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
               x: smoothed.x,
               y: smoothed.y,
               z: relativeAltitude, // Can be positive (up) or negative (down)
-              heading: flowHeading,
+              heading: worldHeading,
               vx: finalVx,
               vy: finalVy,
               vz, // Vertical velocity
@@ -298,13 +308,13 @@ export function useCameraMovement({ isNavigating }: UseCameraMovementProps) {
 
             log.debug(
               `Movement: pos=(${coordsRef.current.x.toFixed(2)}, ${coordsRef.current.y.toFixed(2)}, ${coordsRef.current.z.toFixed(2)}) ` +
-              `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s flowAng=${flowHeading.toFixed(0)}° alt=${altitude.toFixed(1)}m feat=${currFeatures.length} match=${matches.length}`
+              `vel=(${finalVx.toFixed(2)}, ${finalVy.toFixed(2)}) speed=${speed.toFixed(2)} m/s worldHeading=${worldHeading.toFixed(0)}° (flow=${flowAngleDegrees.toFixed(0)}°+compass=${compassHeading.toFixed(0)}°) alt=${altitude.toFixed(1)}m feat=${currFeatures.length} match=${matches.length}`
             );
 
             // Warn if heading is stuck at specific angles
-            const roundedHeading = Math.round(flowHeading / 45) * 45;
-            if (speed > 0.1 && Math.abs(flowHeading - roundedHeading) < 2) {
-              log.warn(`[ANGLE-LOCK] Heading stuck at ${roundedHeading}° - optical flow may be constrained!`);
+            const roundedHeading = Math.round(worldHeading / 45) * 45;
+            if (speed > 0.1 && Math.abs(worldHeading - roundedHeading) < 2) {
+              log.warn(`[ANGLE-LOCK] World heading stuck at ${roundedHeading}° - optical flow may be constrained!`);
             }
           }
         }

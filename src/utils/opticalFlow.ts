@@ -28,7 +28,7 @@ export function detectGroundFacing(
  */
 export function detectFeatures(
   imageData: ImageData,
-  maxFeatures = 100,
+  maxFeatures = 150,
   threshold = 0.08,
   isGroundFacing = false
 ): CameraFeature[] {
