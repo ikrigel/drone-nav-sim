@@ -179,13 +179,34 @@ export function App() {
           const jsonString = event.target?.result as string;
           const imported = importFlightCourse(jsonString);
 
-          if (!imported) {
-            alert('Invalid flight course file');
+          if (!imported || !imported.points || imported.points.length === 0) {
+            alert('Invalid flight course file or no points');
             return;
           }
 
-          debugLogger.log('info', `Flight course imported: ${imported.points.length} points`);
-          alert(`Flight imported: ${imported.points.length} points from ${imported.name}`);
+          // Load imported points into track history for map display
+          // Ensure each point has required DroneCoordinates fields
+          const validatedPoints: DroneCoordinates[] = imported.points.map(p => ({
+            x: p.x ?? 0,
+            y: p.y ?? 0,
+            z: p.z ?? 0,
+            heading: p.heading ?? 0,
+            yaw: p.yaw ?? 0,
+            pitch: p.pitch ?? 0,
+            roll: p.roll ?? 0,
+            vx: p.vx ?? 0,
+            vy: p.vy ?? 0,
+            vz: p.vz ?? 0,
+            timestamp: p.timestamp ?? 0,
+          }));
+
+          // Load into track history and display on map
+          setTrackHistory(validatedPoints);
+          setIsFlying(false); // Not currently flying, just viewing imported route
+          setFlightStartTime(0); // No active flight
+
+          debugLogger.log('info', `Flight course imported: ${validatedPoints.length} points from "${imported.name}"`);
+          alert(`✅ Flight imported and displayed!\n\n${validatedPoints.length} points\n${(imported.duration / 1000).toFixed(1)}s duration\n${imported.distance.toFixed(2)}m distance`);
         } catch (err) {
           debugLogger.log('error', `Import error: ${err}`);
           alert('Failed to import flight course');
